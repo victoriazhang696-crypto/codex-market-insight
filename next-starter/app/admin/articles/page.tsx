@@ -49,16 +49,19 @@ export default function AdminArticlesPage() {
         body: JSON.stringify(payload)
       });
 
-      const result = (await response.json()) as { ok: boolean; message?: string };
+      const text = await response.text();
+      const result = text
+        ? JSON.parse(text) as { ok: boolean; message?: string }
+        : { ok: false, message: '服务器没有返回内容。' };
       if (result.ok) {
         setMessage(payload.status === 'published' ? '文章已发布，会员前端可以查看。' : '草稿已保存。');
         await loadDrafts();
         event.currentTarget.reset();
       } else {
-        setMessage(result.message ?? '发布失败');
+        setMessage(result.message ?? `发布失败，状态码：${response.status}`);
       }
-    } catch {
-      setMessage('网络请求失败');
+    } catch (error) {
+      setMessage(error instanceof Error ? `请求失败：${error.message}` : '网络请求失败');
     } finally {
       setLoading(false);
     }

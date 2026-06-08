@@ -22,10 +22,14 @@ function toSlug(input: string) {
 async function createUniqueSlug(supabase: ReturnType<typeof createSupabaseAdminClient>, baseSlug: string) {
   const fallback = `article-${Date.now()}`;
   const base = baseSlug || fallback;
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('articles')
     .select('slug')
     .like('slug', `${base}%`);
+
+  if (error) {
+    return `${base}-${Date.now()}`;
+  }
 
   const usedSlugs = new Set((data ?? []).map((item) => item.slug));
   if (!usedSlugs.has(base)) {
@@ -41,37 +45,47 @@ async function createUniqueSlug(supabase: ReturnType<typeof createSupabaseAdminC
 }
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as ArticleCreateBody;
-  const title = body.title?.trim() ?? '';
-  const content = body.content?.trim() ?? '';
-  const status = body.status ?? 'draft';
+  try {
+    const body = (await request.json()) as ArticleCreateBody;
+    const title = body.title?.trim() ?? '';
+    const content = body.content?.trim() ?? '';
+    const status = body.status ?? 'draft';
 
-  if (!title) {
-    return NextResponse.json({ ok: false, message: 'Title is required.' }, { status: 400 });
+    if (!title) {
+      return NextResponse.json({ ok: false, message: 'Title is required.' }, { status: 400 });
+    }
+
+    if (!content) {
+      return NextResponse.json({ ok: false, message: 'Content is required.' }, { status: 400 });
+    }
+
+    const supabase = createSupabaseAdminClient();
+    const slug = await createUniqueSlug(supabase, body.slug?.trim() || toSlug(title));
+
+    const { data, error } = await supabase.from('articles').insert({
+      title,
+      slug,
+      content,
+      summary: body.summary?.trim() || null,
+      risk_notice: body.riskNotice?.trim() || null,
+      status,
+      published_at: status === 'published' ? new Date().toISOString() : null
+    }).select('id, title, slug, status').single();
+
+    if (error) {
+      return NextResponse.json({ ok: false, message: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ ok: true, article: data });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        ok: false,
+        message: error instanceof Error ? error.message : '文章发布接口发生未知错误。'
+      },
+      { status: 500 }
+    );
   }
-
-  if (!content) {
-    return NextResponse.json({ ok: false, message: 'Content is required.' }, { status: 400 });
-  }
-
-  const supabase = createSupabaseAdminClient();
-  const slug = await createUniqueSlug(supabase, body.slug?.trim() || toSlug(title));
-
-  const { data, error } = await supabase.from('articles').insert({
-    title,
-    slug,
-    content,
-    summary: body.summary?.trim() || null,
-    risk_notice: body.riskNotice?.trim() || null,
-    status,
-    published_at: status === 'published' ? new Date().toISOString() : null
-  }).select('id, title, slug, status').single();
-
-  if (error) {
-    return NextResponse.json({ ok: false, message: error.message }, { status: 500 });
-  }
-
-  return NextResponse.json({ ok: true, article: data });
 }
 
 export async function GET() {
