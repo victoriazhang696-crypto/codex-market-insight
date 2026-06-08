@@ -1,13 +1,14 @@
 import { getArticleBySlug } from '@/lib/content';
 
 type Params = {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 };
 
 export default async function TodayArticlePage({ params }: Params) {
-  const article = await getArticleBySlug(params.slug);
+  const { slug } = await params;
+  const article = await getArticleBySlug(slug);
 
   return (
     <main className="page-shell">
