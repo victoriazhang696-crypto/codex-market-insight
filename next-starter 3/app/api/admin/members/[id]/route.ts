@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 type Params = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 type MemberUpdateBody = {
@@ -14,7 +14,7 @@ type MemberUpdateBody = {
 };
 
 export async function PATCH(request: Request, { params }: Params) {
-  const { id } = params;
+  const { id } = await params;
   const body = (await request.json()) as MemberUpdateBody;
   const supabase = createSupabaseAdminClient();
 
@@ -40,7 +40,7 @@ export async function PATCH(request: Request, { params }: Params) {
 }
 
 export async function GET(request: Request, { params }: Params) {
-  const { id } = params;
+  const { id } = await params;
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
     .from('profiles')

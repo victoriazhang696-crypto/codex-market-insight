@@ -10,7 +10,7 @@ async function getRole(request: NextRequest, response: NextResponse) {
   const { data } = await supabase.auth.getUser();
 
   if (!data.user) {
-    return { role: null as const, userId: null as const };
+    return { role: null, userId: null, status: null, expireDate: null };
   }
 
   const { data: profile } = await supabase

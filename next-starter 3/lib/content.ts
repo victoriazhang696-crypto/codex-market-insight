@@ -85,7 +85,7 @@ function mapAnnouncement(row: Record<string, unknown>): AnnouncementItem {
 
 export async function getPublishedArticles() {
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase
       .from('articles')
       .select('id, slug, title, summary, content, risk_notice, status, published_at')
@@ -109,7 +109,7 @@ export async function getArticleBySlug(slug: string) {
 
 export async function getAnyArticleBySlug(slug: string) {
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase
       .from('articles')
       .select('id, slug, title, summary, content, risk_notice, status, published_at')
@@ -130,7 +130,7 @@ export async function getAnyArticleBySlug(slug: string) {
 
 export async function getAnnouncements() {
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase
       .from('announcements')
       .select('id, title, body, status, published_at')
@@ -149,7 +149,7 @@ export async function getAnnouncements() {
 
 export async function getDraftArticles() {
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase
       .from('articles')
       .select('id, slug, title, summary, content, risk_notice, status, published_at')
