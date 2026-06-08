@@ -38,7 +38,7 @@ export default function AdminLoginForm({ searchParams }: AdminLoginFormProps) {
       if (payload.ok) {
         const next = searchParams.next || '/admin';
         setMessage('登录成功，正在跳转...');
-        router.push(next);
+        router.replace(next);
       } else {
         setMessage(payload.message ?? '登录失败');
       }

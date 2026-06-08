@@ -19,6 +19,27 @@ function toSlug(input: string) {
     .replace(/^-+|-+$/g, '');
 }
 
+async function createUniqueSlug(supabase: ReturnType<typeof createSupabaseAdminClient>, baseSlug: string) {
+  const fallback = `article-${Date.now()}`;
+  const base = baseSlug || fallback;
+  const { data } = await supabase
+    .from('articles')
+    .select('slug')
+    .like('slug', `${base}%`);
+
+  const usedSlugs = new Set((data ?? []).map((item) => item.slug));
+  if (!usedSlugs.has(base)) {
+    return base;
+  }
+
+  let counter = 2;
+  while (usedSlugs.has(`${base}-${counter}`)) {
+    counter += 1;
+  }
+
+  return `${base}-${counter}`;
+}
+
 export async function POST(request: Request) {
   const body = (await request.json()) as ArticleCreateBody;
   const title = body.title?.trim() ?? '';
@@ -34,7 +55,7 @@ export async function POST(request: Request) {
   }
 
   const supabase = createSupabaseAdminClient();
-  const slug = body.slug?.trim() || toSlug(title);
+  const slug = await createUniqueSlug(supabase, body.slug?.trim() || toSlug(title));
 
   const { data, error } = await supabase.from('articles').insert({
     title,

@@ -36,7 +36,13 @@ export function ArticleEditorForm({ article }: Props) {
       });
 
       const result = (await response.json()) as { ok: boolean; message?: string };
-      setMessage(result.ok ? '文章已保存。' : result.message ?? '保存失败');
+      setMessage(
+        result.ok
+          ? payload.status === 'published'
+            ? '文章已发布，会员前端可以查看。'
+            : '草稿已保存。'
+          : result.message ?? '保存失败'
+      );
     } catch {
       setMessage('网络请求失败');
     } finally {

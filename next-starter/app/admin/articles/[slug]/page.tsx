@@ -1,4 +1,4 @@
-import { getAnyArticleBySlug } from '@/lib/content';
+import { getAdminArticleBySlug } from '@/lib/admin-content';
 import { ArticleEditorForm } from './editor-form';
 
 export default async function AdminArticleEditorPage({
@@ -9,7 +9,7 @@ export default async function AdminArticleEditorPage({
   }>;
 }) {
   const { slug } = await params;
-  const article = await getAnyArticleBySlug(slug);
+  const article = await getAdminArticleBySlug(slug);
 
   if (!article) {
     return (
