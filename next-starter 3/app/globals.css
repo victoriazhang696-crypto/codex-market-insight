@@ -1,0 +1,272 @@
+:root {
+  color-scheme: dark;
+  --bg: #07100f;
+  --panel: rgba(14, 22, 20, 0.92);
+  --ink: #eff8f4;
+  --muted: #94a99d;
+  --line: rgba(138, 180, 166, 0.18);
+  --cyan: #44ead9;
+  --gold: #d7a64b;
+  --shadow: 0 22px 60px rgba(0, 0, 0, 0.35);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background:
+    linear-gradient(rgba(68, 234, 217, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(68, 234, 217, 0.03) 1px, transparent 1px),
+    var(--bg);
+  background-size: 28px 28px, 28px 28px, auto;
+  color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button, input {
+  font: inherit;
+}
+
+.page-shell,
+.center-shell {
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.subtle {
+  color: var(--muted);
+}
+
+.hero-card,
+.auth-card,
+.feature-card,
+.metric-card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.hero-card,
+.auth-card {
+  padding: 24px;
+}
+
+.hero-card.dark {
+  background: linear-gradient(145deg, rgba(12, 17, 16, 0.98), rgba(16, 24, 22, 0.98));
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: var(--cyan);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+h1, h2, p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 12px;
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1.05;
+}
+
+.lede {
+  color: var(--muted);
+  max-width: 780px;
+}
+
+.hero-grid,
+.card-grid,
+.metric-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.form-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.inline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.primary-link,
+.secondary-link,
+.primary-button,
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 10px;
+  text-decoration: none;
+  border: 1px solid var(--line);
+  cursor: pointer;
+}
+
+.primary-link,
+.primary-button {
+  background: var(--cyan);
+  color: #04110f;
+  border-color: transparent;
+  font-weight: 800;
+}
+
+.secondary-link,
+.secondary-button {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--ink);
+}
+
+.helper-box {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.stack-list {
+  display: grid;
+  gap: 10px;
+}
+
+.stack-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+.data-table th,
+.data-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.hero-grid {
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: start;
+}
+
+.account-card {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.label {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.card-grid {
+  margin-top: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.feature-card,
+.metric-card {
+  padding: 18px;
+}
+
+.metric-grid {
+  margin-top: 16px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.auth-card {
+  max-width: 460px;
+  margin: 0 auto;
+}
+
+.form-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.form-stack label {
+  display: grid;
+  gap: 6px;
+}
+
+.form-stack input {
+  min-height: 46px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--ink);
+}
+
+.form-stack textarea,
+.form-stack select {
+  min-height: 46px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--ink);
+}
+
+.form-stack textarea {
+  min-height: 180px;
+  resize: vertical;
+}
+
+.form-stack select {
+  padding: 0 12px;
+}
+
+.form-stack button {
+  min-height: 46px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--cyan);
+  color: #04110f;
+  font-weight: 800;
+}
+
+@media (max-width: 900px) {
+  .hero-grid,
+  .card-grid,
+  .metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
