@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { accountNumberToEmail, isEightDigitAccountNumber, normalizePhonePassword } from '@/lib/account';
@@ -16,11 +16,11 @@ export default function LoginForm({ searchParams }: LoginFormProps) {
   const router = useRouter();
   const [accountNumber, setAccountNumber] = useState('10002888');
   const [password, setPassword] = useState('60123456789');
+  const [remember, setRemember] = useState(false);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
-  async function onSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function login(nextAccountNumber: string, nextPassword: string, shouldRemember: boolean) {
     setLoading(true);
     setMessage('正在登录...');
 
@@ -31,16 +31,24 @@ export default function LoginForm({ searchParams }: LoginFormProps) {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          accountNumber,
-          password
+          accountNumber: nextAccountNumber,
+          password: nextPassword
         })
       });
 
       const payload = (await response.json()) as { ok: boolean; message?: string };
       if (payload.ok) {
         const next = searchParams.next || '/';
+        if (shouldRemember) {
+          window.localStorage.setItem(
+            'member-login',
+            JSON.stringify({ accountNumber: nextAccountNumber, password: nextPassword })
+          );
+        } else {
+          window.localStorage.removeItem('member-login');
+        }
         setMessage('登录成功，正在跳转...');
-        router.push(next);
+        router.replace(next);
       } else {
         setMessage(payload.message ?? '登录失败');
       }
@@ -49,6 +57,30 @@ export default function LoginForm({ searchParams }: LoginFormProps) {
     } finally {
       setLoading(false);
     }
+  }
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem('member-login');
+    if (!saved || searchParams.reason) {
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(saved) as { accountNumber?: string; password?: string };
+      if (parsed.accountNumber && parsed.password) {
+        setAccountNumber(parsed.accountNumber);
+        setPassword(parsed.password);
+        setRemember(true);
+        void login(parsed.accountNumber, parsed.password, true);
+      }
+    } catch {
+      window.localStorage.removeItem('member-login');
+    }
+  }, []);
+
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await login(accountNumber, password, remember);
   }
 
   return (
@@ -79,6 +111,14 @@ export default function LoginForm({ searchParams }: LoginFormProps) {
               placeholder="60123456789"
               type="password"
             />
+          </label>
+          <label className="checkbox-row">
+            <input
+              checked={remember}
+              onChange={(event) => setRemember(event.target.checked)}
+              type="checkbox"
+            />
+            <span>记住账号和密码，下次自动登录</span>
           </label>
           <button type="submit" className="primary-button" disabled={loading}>
             {loading ? '登录中...' : '登录'}

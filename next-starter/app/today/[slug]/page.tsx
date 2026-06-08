@@ -18,7 +18,7 @@ export default async function TodayArticlePage({ params }: Params) {
           <h1>文章不存在或尚未发布</h1>
           <p className="lede">请返回今日洞察查看已发布内容。</p>
           <div className="inline-actions">
-            <a className="secondary-link" href="/today">返回今日洞察</a>
+            <a className="secondary-link" href="/">返回首页</a>
           </div>
         </section>
       </main>
@@ -32,7 +32,8 @@ export default async function TodayArticlePage({ params }: Params) {
         <h1>{article.title}</h1>
         <p className="lede">{article.summary}</p>
         <div className="inline-actions">
-          <a className="secondary-link" href="/today">返回今日洞察</a>
+          <a className="secondary-link" href="/">返回首页</a>
+          <a className="secondary-link" href="/today">今日洞察</a>
         </div>
       </section>
 

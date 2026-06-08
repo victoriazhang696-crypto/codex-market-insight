@@ -11,6 +11,9 @@ export default async function TodayPage() {
           <p className="eyebrow">今日洞察</p>
           <h1>暂无已发布洞察</h1>
           <p className="lede">管理员发布文章后，会员会在这里看到最新内容。</p>
+          <div className="inline-actions">
+            <a className="secondary-link" href="/">返回首页</a>
+          </div>
         </section>
       </main>
     );
@@ -25,6 +28,7 @@ export default async function TodayPage() {
         <div className="inline-actions">
           <a className="primary-link" href={`/today/${article.slug}`}>查看全文</a>
           <a className="secondary-link" href="/history">查看历史洞察</a>
+          <a className="secondary-link" href="/">返回首页</a>
         </div>
       </section>
 
