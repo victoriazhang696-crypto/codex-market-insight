@@ -1,11 +1,10 @@
-const metrics = [
-  { label: '总会员数', value: '411' },
-  { label: '有效会员', value: '384' },
-  { label: '今日阅读', value: '128' },
-  { label: '今日登录', value: '96' }
-];
+import { getAdminDashboardMetrics } from '@/lib/admin-stats';
 
-export default function AdminPage() {
+export const dynamic = 'force-dynamic';
+
+export default async function AdminPage() {
+  const metrics = await getAdminDashboardMetrics();
+
   return (
     <main className="page-shell">
       <section className="hero-card dark">
@@ -29,6 +28,16 @@ export default function AdminPage() {
             <strong>{item.value}</strong>
           </article>
         ))}
+      </section>
+
+      <section className="hero-card" style={{ marginTop: 16 }}>
+        <h2>新增客户</h2>
+        <p className="lede">
+          客户账号用 8 位数字，初始密码用手机号。创建后客户即可从会员登录页进入。
+        </p>
+        <div className="inline-actions">
+          <a className="primary-link" href="/admin/members">进入客户管理</a>
+        </div>
       </section>
     </main>
   );
