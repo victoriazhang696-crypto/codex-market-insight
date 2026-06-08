@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from 'react';
 
+import { articleCategories, type ArticleCategory } from '@/lib/article-categories';
 import type { ContentArticle } from '@/lib/content';
 
 type Props = {
@@ -23,7 +24,8 @@ export function ArticleEditorForm({ article }: Props) {
       summary: String(formData.get('summary') ?? ''),
       content: String(formData.get('content') ?? ''),
       riskNotice: String(formData.get('riskNotice') ?? ''),
-      status: String(formData.get('status') ?? article.status) as 'draft' | 'published'
+      status: String(formData.get('status') ?? article.status) as 'draft' | 'published',
+      category: String(formData.get('category') ?? article.category) as ArticleCategory
     };
 
     try {
@@ -52,6 +54,14 @@ export function ArticleEditorForm({ article }: Props) {
 
   return (
     <form className="form-stack" onSubmit={onSubmit}>
+      <label>
+        <span>发布到</span>
+        <select name="category" defaultValue={article.category}>
+          {articleCategories.map((item) => (
+            <option key={item.value} value={item.value}>{item.label}</option>
+          ))}
+        </select>
+      </label>
       <label>
         <span>标题</span>
         <input name="title" defaultValue={article.title} />

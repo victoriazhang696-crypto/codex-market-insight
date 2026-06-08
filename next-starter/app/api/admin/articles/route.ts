@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { isArticleCategory, type ArticleCategory } from '@/lib/article-categories';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 type ArticleCreateBody = {
@@ -8,6 +9,7 @@ type ArticleCreateBody = {
   summary?: string;
   riskNotice?: string;
   status?: 'draft' | 'published';
+  category?: ArticleCategory;
   slug?: string;
 };
 
@@ -50,6 +52,7 @@ export async function POST(request: Request) {
     const title = body.title?.trim() ?? '';
     const content = body.content?.trim() ?? '';
     const status = body.status ?? 'draft';
+    const category = isArticleCategory(body.category) ? body.category : 'market_today';
 
     if (!title) {
       return NextResponse.json({ ok: false, message: 'Title is required.' }, { status: 400 });
@@ -62,15 +65,33 @@ export async function POST(request: Request) {
     const supabase = createSupabaseAdminClient();
     const slug = await createUniqueSlug(supabase, body.slug?.trim() || toSlug(title));
 
-    const { data, error } = await supabase.from('articles').insert({
+    const insertPayload = {
       title,
       slug,
       content,
       summary: body.summary?.trim() || null,
       risk_notice: body.riskNotice?.trim() || null,
       status,
+      content_category: category,
       published_at: status === 'published' ? new Date().toISOString() : null
-    }).select('id, title, slug, status').single();
+    };
+
+    const { data, error } = await supabase.from('articles').insert(insertPayload).select('id, title, slug, status, content_category').single();
+
+    if (error && error.message.toLowerCase().includes('content_category')) {
+      const { content_category: _contentCategory, ...legacyPayload } = insertPayload;
+      const legacyResult = await supabase
+        .from('articles')
+        .insert(legacyPayload)
+        .select('id, title, slug, status')
+        .single();
+
+      if (legacyResult.error) {
+        return NextResponse.json({ ok: false, message: legacyResult.error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ ok: true, article: legacyResult.data });
+    }
 
     if (error) {
       return NextResponse.json({ ok: false, message: error.message }, { status: 500 });
@@ -92,11 +113,23 @@ export async function GET() {
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
     .from('articles')
-    .select('id, title, slug, status')
+    .select('id, title, slug, status, content_category')
     .order('updated_at', { ascending: false });
 
   if (error) {
-    return NextResponse.json({ ok: false, message: error.message }, { status: 500 });
+    const fallbackResult = await supabase
+      .from('articles')
+      .select('id, title, slug, status')
+      .order('updated_at', { ascending: false });
+
+    if (fallbackResult.error) {
+      return NextResponse.json({ ok: false, message: fallbackResult.error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      ok: true,
+      articles: fallbackResult.data ?? []
+    });
   }
 
   return NextResponse.json({

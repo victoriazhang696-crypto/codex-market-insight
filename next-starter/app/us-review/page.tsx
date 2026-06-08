@@ -1,19 +1,22 @@
 import { getPublishedArticlesByCategory } from '@/lib/content';
 
-export default async function HistoryPage() {
-  const archive = await getPublishedArticlesByCategory('market_today');
+export default async function UsReviewPage() {
+  const articles = await getPublishedArticlesByCategory('us_review');
 
   return (
     <main className="page-shell">
       <section className="hero-card dark">
-        <p className="eyebrow">历史洞察</p>
-        <h1>已发布观点档案</h1>
-        <p className="lede">这里会逐步接成 Supabase 查询，支持按月份、关键词和资产类别筛选。</p>
+        <p className="eyebrow">US复盘简报</p>
+        <h1>US 市场复盘</h1>
+        <p className="lede">这里显示后台发布到“US复盘简报”的会员内容。</p>
+        <div className="inline-actions">
+          <a className="secondary-link" href="/">返回首页</a>
+        </div>
       </section>
 
       <section className="hero-card" style={{ marginTop: 16 }}>
         <div className="stack-list">
-          {archive.length > 0 ? archive.map((item) => (
+          {articles.length > 0 ? articles.map((item) => (
             <article key={item.id} className="stack-item">
               <div>
                 <strong>{item.title}</strong>
@@ -23,8 +26,8 @@ export default async function HistoryPage() {
             </article>
           )) : (
             <article className="stack-item">
-              <strong>暂无历史洞察</strong>
-              <span className="subtle">管理员发布文章后，这里会自动显示。</span>
+              <strong>暂无 US 复盘简报</strong>
+              <span className="subtle">后台发布到该栏目后，这里会自动显示。</span>
             </article>
           )}
         </div>

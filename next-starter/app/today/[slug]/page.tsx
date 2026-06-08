@@ -1,4 +1,4 @@
-import { getArticleBySlug } from '@/lib/content';
+import { getArticleBySlug, getArticleCategoryLabel } from '@/lib/content';
 
 type Params = {
   params: Promise<{
@@ -25,10 +25,12 @@ export default async function TodayArticlePage({ params }: Params) {
     );
   }
 
+  const categoryLabel = getArticleCategoryLabel(article.category);
+
   return (
     <main className="page-shell">
       <section className="hero-card dark">
-        <p className="eyebrow">今日洞察详情</p>
+        <p className="eyebrow">{categoryLabel}</p>
         <h1>{article.title}</h1>
         <p className="lede">{article.summary}</p>
         <div className="inline-actions">

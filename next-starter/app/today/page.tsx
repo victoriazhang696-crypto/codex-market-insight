@@ -1,7 +1,7 @@
-import { getPublishedArticles } from '@/lib/content';
+import { getPublishedArticlesByCategory } from '@/lib/content';
 
 export default async function TodayPage() {
-  const articles = await getPublishedArticles();
+  const articles = await getPublishedArticlesByCategory('market_today');
   const article = articles[0];
 
   if (!article) {

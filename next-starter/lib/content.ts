@@ -1,4 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { isArticleCategory, type ArticleCategory } from '@/lib/article-categories';
+
+export { articleCategories, getArticleCategoryLabel, isArticleCategory, type ArticleCategory } from '@/lib/article-categories';
 
 export type ContentArticle = {
   id: string;
@@ -8,6 +11,7 @@ export type ContentArticle = {
   content: string;
   riskNotice: string;
   status: 'draft' | 'published';
+  category: ArticleCategory;
   publishedAt?: string;
 };
 
@@ -45,6 +49,7 @@ function mapArticle(row: Record<string, unknown>): ContentArticle {
     content: String(row.content ?? ''),
     riskNotice: String(row.risk_notice ?? row.riskNotice ?? ''),
     status: row.status === 'draft' ? 'draft' : 'published',
+    category: isArticleCategory(row.content_category) ? row.content_category : 'market_today',
     publishedAt: row.published_at ? String(row.published_at) : undefined
   };
 }
@@ -64,11 +69,25 @@ export async function getPublishedArticles() {
     const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase
       .from('articles')
-      .select('id, slug, title, summary, content, risk_notice, status, published_at')
+      .select('id, slug, title, summary, content, risk_notice, status, content_category, published_at')
       .eq('status', 'published')
       .order('published_at', { ascending: false });
 
-    if (error || !data?.length) {
+    if (error) {
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('articles')
+        .select('id, slug, title, summary, content, risk_notice, status, published_at')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false });
+
+      if (fallbackError || !fallbackData?.length) {
+        return [];
+      }
+
+      return fallbackData.map((row) => mapArticle(row));
+    }
+
+    if (!data?.length) {
       return [];
     }
 
@@ -76,6 +95,11 @@ export async function getPublishedArticles() {
   } catch {
     return [];
   }
+}
+
+export async function getPublishedArticlesByCategory(category: ArticleCategory) {
+  const articles = await getPublishedArticles();
+  return articles.filter((article) => article.category === category);
 }
 
 export async function getArticleBySlug(slug: string) {
@@ -88,7 +112,7 @@ export async function getAnyArticleBySlug(slug: string) {
     const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase
       .from('articles')
-      .select('id, slug, title, summary, content, risk_notice, status, published_at')
+      .select('id, slug, title, summary, content, risk_notice, status, content_category, published_at')
       .eq('slug', slug)
       .single();
 
@@ -128,7 +152,7 @@ export async function getDraftArticles() {
     const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase
       .from('articles')
-      .select('id, slug, title, summary, content, risk_notice, status, published_at')
+      .select('id, slug, title, summary, content, risk_notice, status, content_category, published_at')
       .eq('status', 'draft')
       .order('updated_at', { ascending: false });
 

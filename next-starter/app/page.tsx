@@ -17,6 +17,16 @@ const highlights = [
     href: '/announcements'
   },
   {
+    title: '陪跑专项',
+    body: '专项陪跑内容、策略提醒和重点复盘。',
+    href: '/specials'
+  },
+  {
+    title: 'US复盘简报',
+    body: '美股市场复盘、重点资产和机会追踪。',
+    href: '/us-review'
+  },
+  {
     title: '待解锁 AI 服务',
     body: '预留 AI 市场助理、股票分析和更多会员服务。',
     href: '/soon'

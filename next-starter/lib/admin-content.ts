@@ -1,3 +1,4 @@
+import { isArticleCategory } from '@/lib/article-categories';
 import { type ContentArticle } from '@/lib/content';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
@@ -10,6 +11,7 @@ function mapArticle(row: Record<string, unknown>): ContentArticle {
     content: String(row.content ?? ''),
     riskNotice: String(row.risk_notice ?? ''),
     status: row.status === 'draft' ? 'draft' : 'published',
+    category: isArticleCategory(row.content_category) ? row.content_category : 'market_today',
     publishedAt: row.published_at ? String(row.published_at) : undefined
   };
 }
@@ -18,11 +20,25 @@ export async function getAdminArticleBySlug(slug: string) {
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
     .from('articles')
-    .select('id, slug, title, summary, content, risk_notice, status, published_at')
+    .select('id, slug, title, summary, content, risk_notice, status, content_category, published_at')
     .eq('slug', slug)
     .single();
 
-  if (error || !data) {
+  if (error) {
+    const { data: fallbackData, error: fallbackError } = await supabase
+      .from('articles')
+      .select('id, slug, title, summary, content, risk_notice, status, published_at')
+      .eq('slug', slug)
+      .single();
+
+    if (fallbackError || !fallbackData) {
+      return null;
+    }
+
+    return mapArticle(fallbackData);
+  }
+
+  if (!data) {
     return null;
   }
 

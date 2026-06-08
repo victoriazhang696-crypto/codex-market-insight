@@ -2,17 +2,19 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 
+import { articleCategories, getArticleCategoryLabel, type ArticleCategory } from '@/lib/article-categories';
+
 export default function AdminArticlesPage() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [drafts, setDrafts] = useState<Array<{ id: string; title: string; status: string; slug: string }>>([]);
+  const [drafts, setDrafts] = useState<Array<{ id: string; title: string; status: string; slug: string; content_category?: ArticleCategory }>>([]);
 
   async function loadDrafts() {
     try {
       const response = await fetch('/api/admin/articles', { cache: 'no-store' });
       const payload = (await response.json()) as {
         ok: boolean;
-        articles?: Array<{ id: string; title: string; slug: string; status: string }>;
+        articles?: Array<{ id: string; title: string; slug: string; status: string; content_category?: ArticleCategory }>;
       };
       if (payload.ok && payload.articles) {
         setDrafts(payload.articles);
@@ -38,7 +40,8 @@ export default function AdminArticlesPage() {
       content: String(formData.get('content') ?? ''),
       summary: String(formData.get('summary') ?? ''),
       riskNotice: String(formData.get('riskNotice') ?? ''),
-      status: String(formData.get('status') ?? 'draft') as 'draft' | 'published'
+      status: String(formData.get('status') ?? 'draft') as 'draft' | 'published',
+      category: String(formData.get('category') ?? 'market_today') as ArticleCategory
     };
 
     try {
@@ -80,6 +83,15 @@ export default function AdminArticlesPage() {
         <h2>AI 辅助发布</h2>
         <form className="form-stack" onSubmit={onSubmit}>
           <label>
+            <span>发布到</span>
+            <select name="category" defaultValue="market_today">
+              {articleCategories.map((item) => (
+                <option key={item.value} value={item.value}>{item.label}</option>
+              ))}
+            </select>
+            <span className="subtle">选择会员前端显示栏目；后续独立功能也可以先作为栏目接入。</span>
+          </label>
+          <label>
             <span>标题</span>
             <input name="title" placeholder="今日市场洞察：黄金与美元" required />
           </label>
@@ -120,7 +132,9 @@ export default function AdminArticlesPage() {
             <article key={item.id} className="stack-item">
               <div>
                 <strong>{item.title}</strong>
-                <span className="subtle">{item.status}</span>
+                <span className="subtle">
+                  {getArticleCategoryLabel(item.content_category ?? 'market_today')} · {item.status}
+                </span>
               </div>
               <a href={`/admin/articles/${item.slug}`}>编辑 / 预览</a>
             </article>
