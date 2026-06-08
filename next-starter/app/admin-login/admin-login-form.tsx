@@ -12,8 +12,8 @@ type AdminLoginFormProps = {
 
 export default function AdminLoginForm({ searchParams }: AdminLoginFormProps) {
   const router = useRouter();
-  const [email, setEmail] = useState('admin@company.com');
-  const [password, setPassword] = useState('password');
+  const [accountNumber, setAccountNumber] = useState('90048253');
+  const [password, setPassword] = useState('362681');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -29,7 +29,7 @@ export default function AdminLoginForm({ searchParams }: AdminLoginFormProps) {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          email,
+          accountNumber,
           password
         })
       });
@@ -60,15 +60,19 @@ export default function AdminLoginForm({ searchParams }: AdminLoginFormProps) {
         ) : null}
         <form className="form-stack" onSubmit={onSubmit}>
           <label>
-            <span>管理员邮箱</span>
-            <input value={email} onChange={(event) => setEmail(event.target.value)} placeholder="admin@company.com" />
+            <span>管理员账号</span>
+            <input
+              value={accountNumber}
+              onChange={(event) => setAccountNumber(event.target.value)}
+              placeholder="90048253"
+            />
           </label>
           <label>
             <span>管理员密码</span>
             <input
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              placeholder="password"
+              placeholder="362681"
               type="password"
             />
           </label>
@@ -81,6 +85,7 @@ export default function AdminLoginForm({ searchParams }: AdminLoginFormProps) {
           <p className="subtle">
             客户登录请走 <a href="/login">会员登录</a>
           </p>
+          <p className="subtle">管理员账号会映射到内部认证邮箱：90048253@admins.local</p>
         </div>
       </section>
     </main>

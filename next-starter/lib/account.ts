@@ -11,6 +11,15 @@ export function accountNumberToEmail(accountNumber: string) {
   return `${normalized}@members.local`;
 }
 
+export function adminAccountNumberToEmail(accountNumber: string) {
+  const normalized = accountNumber.trim();
+  if (!isEightDigitAccountNumber(normalized)) {
+    throw new Error('Admin account number must be exactly 8 digits.');
+  }
+
+  return `${normalized}@admins.local`;
+}
+
 export function normalizePhonePassword(phone: string) {
   return phone.trim();
 }

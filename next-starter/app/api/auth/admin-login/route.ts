@@ -1,14 +1,17 @@
 import { NextResponse } from 'next/server';
 
+import { adminAccountNumberToEmail, isEightDigitAccountNumber } from '@/lib/account';
 import { createSupabaseRouteClient } from '@/lib/supabase/route-client';
 
 type AdminLoginBody = {
+  accountNumber?: string;
   email?: string;
   password?: string;
 };
 
 export async function POST(request: Request) {
   const body = (await request.json()) as AdminLoginBody;
+  const accountNumber = body.accountNumber?.trim() ?? '';
   const email = body.email?.trim() ?? '';
   const password = body.password?.trim() ?? '';
   const cookieResponse = NextResponse.next();
@@ -27,12 +30,16 @@ export async function POST(request: Request) {
     }
   );
 
-  if (!email || !password) {
-    return NextResponse.json({ ok: false, message: 'Email and password are required.' }, { status: 400 });
+  if ((!accountNumber && !email) || !password) {
+    return NextResponse.json({ ok: false, message: 'Admin account and password are required.' }, { status: 400 });
+  }
+
+  if (accountNumber && !isEightDigitAccountNumber(accountNumber)) {
+    return NextResponse.json({ ok: false, message: '管理员账号必须是8位数字。' }, { status: 400 });
   }
 
   const { data, error } = await supabase.auth.signInWithPassword({
-    email,
+    email: accountNumber ? adminAccountNumberToEmail(accountNumber) : email,
     password
   });
 
