@@ -184,12 +184,12 @@ h1 {
 }
 
 .brand-lockup img {
-  width: 148px;
-  max-width: 42vw;
+  width: 132px;
+  max-width: 36vw;
   height: auto;
-  border-radius: 8px;
-  background: #fff;
-  padding: 8px;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
 }
 
 .brand-lockup .eyebrow {
@@ -295,6 +295,97 @@ h1 {
   accent-color: var(--cyan);
 }
 
+.article-hero h1 {
+  max-width: 1180px;
+  font-size: clamp(30px, 4.2vw, 56px);
+  line-height: 1.12;
+}
+
+.section-heading-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.section-heading-row h2 {
+  margin-bottom: 0;
+}
+
+.article-preview-list {
+  display: grid;
+  gap: 12px;
+}
+
+.article-preview-card,
+.article-risk-card,
+.article-section,
+.article-lead-block {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.article-preview-card {
+  padding: 18px;
+}
+
+.article-preview-card h3,
+.article-section h2 {
+  margin-bottom: 10px;
+  color: var(--cyan);
+}
+
+.article-preview-card p,
+.article-section p,
+.article-lead-block p {
+  margin-bottom: 0;
+  color: var(--ink);
+  line-height: 1.9;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.article-reader {
+  display: grid;
+  gap: 16px;
+  max-width: 980px;
+  margin: 16px auto 0;
+}
+
+.article-prose {
+  display: grid;
+  gap: 14px;
+}
+
+.article-section,
+.article-lead-block {
+  padding: 22px;
+}
+
+.article-section h2 {
+  font-size: 22px;
+}
+
+.article-risk-card {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border-color: rgba(215, 166, 75, 0.38);
+  background: rgba(215, 166, 75, 0.08);
+}
+
+.article-risk-card span {
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.article-risk-card strong {
+  line-height: 1.7;
+}
+
 @media (max-width: 900px) {
   .hero-grid,
   .card-grid,
@@ -309,5 +400,25 @@ h1 {
   .brand-lockup {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .brand-lockup img {
+    width: 112px;
+    max-width: 52vw;
+  }
+
+  .article-hero h1 {
+    font-size: 30px;
+  }
+
+  .section-heading-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .article-preview-card p,
+  .article-section p,
+  .article-lead-block p {
+    font-size: 16px;
   }
 }

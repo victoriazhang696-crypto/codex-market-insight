@@ -1,3 +1,4 @@
+import { getArticlePreviewBlocks } from '@/lib/article-format';
 import { getPublishedArticlesByCategory } from '@/lib/content';
 
 export default async function TodayPage() {
@@ -19,9 +20,11 @@ export default async function TodayPage() {
     );
   }
 
+  const previewBlocks = getArticlePreviewBlocks(article.content);
+
   return (
     <main className="page-shell">
-      <section className="hero-card dark">
+      <section className="hero-card dark article-hero">
         <p className="eyebrow">今日洞察</p>
         <h1>{article.title}</h1>
         <p className="lede">{article.summary}</p>
@@ -33,13 +36,26 @@ export default async function TodayPage() {
       </section>
 
       <section className="hero-card" style={{ marginTop: 16 }}>
-        <h2>核心要点</h2>
-        <div className="stack-list">
-          {[article.content, article.riskNotice].map((point) => (
-            <article key={point} className="stack-item">
-              <strong>{point}</strong>
+        <div className="section-heading-row">
+          <div>
+            <p className="eyebrow">Preview</p>
+            <h2>核心预览</h2>
+          </div>
+          <span className="subtle">点击查看全文阅读完整内容</span>
+        </div>
+        <div className="article-preview-list">
+          {previewBlocks.map((block, index) => (
+            <article key={`${block.heading ?? 'block'}-${index}`} className="article-preview-card">
+              {block.heading ? <h3>{block.heading}</h3> : null}
+              <p>{block.body}</p>
             </article>
           ))}
+          {article.riskNotice ? (
+            <article className="article-risk-card">
+              <span>风险提示</span>
+              <strong>{article.riskNotice}</strong>
+            </article>
+          ) : null}
         </div>
       </section>
     </main>

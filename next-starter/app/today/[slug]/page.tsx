@@ -1,3 +1,4 @@
+import { splitArticleBlocks } from '@/lib/article-format';
 import { getArticleBySlug, getArticleCategoryLabel } from '@/lib/content';
 
 type Params = {
@@ -26,10 +27,11 @@ export default async function TodayArticlePage({ params }: Params) {
   }
 
   const categoryLabel = getArticleCategoryLabel(article.category);
+  const articleBlocks = splitArticleBlocks(article.content);
 
   return (
     <main className="page-shell">
-      <section className="hero-card dark">
+      <section className="hero-card dark article-hero">
         <p className="eyebrow">{categoryLabel}</p>
         <h1>{article.title}</h1>
         <p className="lede">{article.summary}</p>
@@ -39,12 +41,21 @@ export default async function TodayArticlePage({ params }: Params) {
         </div>
       </section>
 
-      <section className="hero-card" style={{ marginTop: 16 }}>
-        <h2>正文</h2>
-        <p>{article.content}</p>
-        <div className="helper-box">
-          <p className="subtle">{article.riskNotice}</p>
+      <section className="article-reader">
+        <div className="article-prose">
+          {articleBlocks.map((block, index) => (
+            <section key={`${block.heading ?? 'paragraph'}-${index}`} className={block.heading ? 'article-section' : 'article-lead-block'}>
+              {block.heading ? <h2>{block.heading}</h2> : null}
+              <p>{block.body}</p>
+            </section>
+          ))}
         </div>
+        {article.riskNotice ? (
+          <aside className="article-risk-card">
+            <span>风险提示</span>
+            <strong>{article.riskNotice}</strong>
+          </aside>
+        ) : null}
       </section>
     </main>
   );

@@ -49,7 +49,7 @@ export default async function MemberHomePage() {
     <main className="page-shell">
       <section className="hero-card">
         <div className="brand-lockup">
-          <img src="/homilychart-malaysia-logo.png" alt="HomilyChart Malaysia" />
+          <img src="/homilychart-malaysia-logo-cutout.png" alt="HomilyChart Malaysia" />
           <p className="eyebrow">大马会员专属 AI 服务</p>
         </div>
         <div className="hero-grid">

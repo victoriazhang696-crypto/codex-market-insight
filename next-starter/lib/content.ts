@@ -103,8 +103,37 @@ export async function getPublishedArticlesByCategory(category: ArticleCategory) 
 }
 
 export async function getArticleBySlug(slug: string) {
+  const decodedSlug = decodeURIComponent(slug);
+
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from('articles')
+      .select('id, slug, title, summary, content, risk_notice, status, content_category, published_at')
+      .eq('slug', decodedSlug)
+      .eq('status', 'published')
+      .single();
+
+    if (!error && data) {
+      return mapArticle(data);
+    }
+
+    const fallbackResult = await supabase
+      .from('articles')
+      .select('id, slug, title, summary, content, risk_notice, status, published_at')
+      .eq('slug', decodedSlug)
+      .eq('status', 'published')
+      .single();
+
+    if (!fallbackResult.error && fallbackResult.data) {
+      return mapArticle(fallbackResult.data);
+    }
+  } catch {
+    // Fall through to list lookup below.
+  }
+
   const articles = await getPublishedArticles();
-  return articles.find((article) => article.slug === slug) ?? null;
+  return articles.find((article) => article.slug === decodedSlug || article.slug === slug) ?? null;
 }
 
 export async function getAnyArticleBySlug(slug: string) {
