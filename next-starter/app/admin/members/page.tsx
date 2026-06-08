@@ -38,10 +38,11 @@ export default function AdminMembersPage() {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
     setLoading(true);
     setMessage('正在创建客户...');
 
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(form);
     const payload = {
       accountNumber: String(formData.get('accountNumber') ?? ''),
       fullName: String(formData.get('fullName') ?? ''),
@@ -61,8 +62,8 @@ export default function AdminMembersPage() {
       const result = (await response.json()) as { ok: boolean; message?: string };
       if (result.ok) {
         setMessage(`客户创建成功。账号：${payload.accountNumber}，密码：${payload.phone}`);
+        form.reset();
         await loadMembers();
-        event.currentTarget.reset();
       } else {
         setMessage(result.message ?? '创建失败');
       }

@@ -28,10 +28,11 @@ export default function AdminArticlesPage() {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
     setLoading(true);
     setMessage('正在提交文章...');
 
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(form);
     const payload = {
       title: String(formData.get('title') ?? ''),
       content: String(formData.get('content') ?? ''),
@@ -55,8 +56,8 @@ export default function AdminArticlesPage() {
         : { ok: false, message: '服务器没有返回内容。' };
       if (result.ok) {
         setMessage(payload.status === 'published' ? '文章已发布，会员前端可以查看。' : '草稿已保存。');
+        form.reset();
         await loadDrafts();
-        event.currentTarget.reset();
       } else {
         setMessage(result.message ?? `发布失败，状态码：${response.status}`);
       }
