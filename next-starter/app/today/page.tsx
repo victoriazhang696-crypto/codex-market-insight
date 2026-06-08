@@ -4,6 +4,18 @@ export default async function TodayPage() {
   const articles = await getPublishedArticles();
   const article = articles[0];
 
+  if (!article) {
+    return (
+      <main className="page-shell">
+        <section className="hero-card dark">
+          <p className="eyebrow">今日洞察</p>
+          <h1>暂无已发布洞察</h1>
+          <p className="lede">管理员发布文章后，会员会在这里看到最新内容。</p>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="page-shell">
       <section className="hero-card dark">

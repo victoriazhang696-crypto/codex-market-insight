@@ -7,25 +7,22 @@ export default function AdminArticlesPage() {
   const [loading, setLoading] = useState(false);
   const [drafts, setDrafts] = useState<Array<{ id: string; title: string; status: string; slug: string }>>([]);
 
-  useEffect(() => {
-    async function loadDrafts() {
-      try {
-        const response = await fetch('/api/admin/articles');
-        const payload = (await response.json()) as {
-          ok: boolean;
-          articles?: Array<{ id: string; title: string; slug: string; status: string }>;
-        };
-        if (payload.ok && payload.articles) {
-          setDrafts(payload.articles);
-        }
-      } catch {
-        setDrafts([
-          { id: 'seed-1', title: '今日市场洞察：黄金与美元', status: 'Draft', slug: 'gold-dollar' },
-          { id: 'seed-2', title: '能源供应扰动观察', status: 'Published', slug: 'energy-supply-shock' }
-        ]);
+  async function loadDrafts() {
+    try {
+      const response = await fetch('/api/admin/articles', { cache: 'no-store' });
+      const payload = (await response.json()) as {
+        ok: boolean;
+        articles?: Array<{ id: string; title: string; slug: string; status: string }>;
+      };
+      if (payload.ok && payload.articles) {
+        setDrafts(payload.articles);
       }
+    } catch {
+      setDrafts([]);
     }
+  }
 
+  useEffect(() => {
     void loadDrafts();
   }, []);
 
@@ -53,7 +50,13 @@ export default function AdminArticlesPage() {
       });
 
       const result = (await response.json()) as { ok: boolean; message?: string };
-      setMessage(result.ok ? '文章已提交。' : result.message ?? '发布失败');
+      if (result.ok) {
+        setMessage(payload.status === 'published' ? '文章已发布，会员前端可以查看。' : '草稿已保存。');
+        await loadDrafts();
+        event.currentTarget.reset();
+      } else {
+        setMessage(result.message ?? '发布失败');
+      }
     } catch {
       setMessage('网络请求失败');
     } finally {
@@ -74,11 +77,11 @@ export default function AdminArticlesPage() {
         <form className="form-stack" onSubmit={onSubmit}>
           <label>
             <span>标题</span>
-            <input name="title" placeholder="今日市场洞察：黄金与美元" />
+            <input name="title" placeholder="今日市场洞察：黄金与美元" required />
           </label>
           <label>
             <span>正文</span>
-            <textarea name="content" rows={8} placeholder="粘贴原文后，由 AI 整理成会员网页内容。" />
+            <textarea name="content" rows={8} placeholder="粘贴原文后，由 AI 整理成会员网页内容。" required />
           </label>
           <label>
             <span>摘要</span>
@@ -109,7 +112,7 @@ export default function AdminArticlesPage() {
       <section className="hero-card" style={{ marginTop: 16 }}>
         <h2>草稿与已发布</h2>
         <div className="stack-list">
-          {drafts.map((item) => (
+          {drafts.length > 0 ? drafts.map((item) => (
             <article key={item.id} className="stack-item">
               <div>
                 <strong>{item.title}</strong>
@@ -117,7 +120,12 @@ export default function AdminArticlesPage() {
               </div>
               <a href={`/admin/articles/${item.slug}`}>编辑 / 预览</a>
             </article>
-          ))}
+          )) : (
+            <article className="stack-item">
+              <strong>暂无文章</strong>
+              <span className="subtle">发布第一篇文章后，这里会自动显示。</span>
+            </article>
+          )}
         </div>
       </section>
     </main>

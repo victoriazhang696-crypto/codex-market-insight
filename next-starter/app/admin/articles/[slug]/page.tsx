@@ -11,6 +11,21 @@ export default async function AdminArticleEditorPage({
   const { slug } = await params;
   const article = await getAnyArticleBySlug(slug);
 
+  if (!article) {
+    return (
+      <main className="page-shell">
+        <section className="hero-card dark">
+          <p className="eyebrow">文章编辑</p>
+          <h1>文章不存在</h1>
+          <p className="lede">请返回文章列表，选择已经保存的文章。</p>
+          <div className="inline-actions">
+            <a className="secondary-link" href="/admin/articles">返回文章列表</a>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="page-shell">
       <section className="hero-card dark">

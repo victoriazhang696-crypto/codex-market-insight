@@ -25,24 +25,24 @@ export default function MemberHomePage() {
               会员登录后，可查看今日洞察、历史观点和公告通知。后续再逐步接入 AI 市场助理与股票分析模块。
             </p>
             <div className="inline-actions">
-              <a className="primary-link" href="/login">前往登录</a>
-              <a className="secondary-link" href="/today">今日洞察</a>
-              <a className="secondary-link" href="/admin">后台入口</a>
+              <a className="primary-link" href="/today">今日洞察</a>
+              <a className="secondary-link" href="/history">历史洞察</a>
+              <a className="secondary-link" href="/announcements">公告通知</a>
               <a className="secondary-link" href="/logout">退出登录</a>
             </div>
           </div>
           <div className="account-card">
             <div>
-              <span className="label">会员账号</span>
-              <strong>10002888</strong>
+              <span className="label">服务范围</span>
+              <strong>市场洞察</strong>
             </div>
             <div>
-              <span className="label">到期时间</span>
-              <strong>2026-12-31</strong>
+              <span className="label">访问方式</span>
+              <strong>会员专属</strong>
             </div>
             <div>
               <span className="label">状态</span>
-              <strong>Active</strong>
+              <strong>已登录</strong>
             </div>
           </div>
         </div>

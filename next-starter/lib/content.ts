@@ -19,30 +19,6 @@ export type AnnouncementItem = {
   publishedAt?: string;
 };
 
-const fallbackArticles: ContentArticle[] = [
-  {
-    id: 'seed-1',
-    slug: 'gold-dollar',
-    title: '黄金、能源与美元：本周市场进入高波动窗口',
-    summary: '市场正在重新定价利率预期、地缘风险与避险需求。',
-    content:
-      '黄金短线仍有支撑，但美元和实际利率反弹会限制上方空间。能源价格关注供应端消息与库存变化，若风险事件升温，油价波动可能扩大。',
-    riskNotice: '以上内容仅供会员研究，不构成投资建议。',
-    status: 'published',
-    publishedAt: '2026-06-07T09:30:00Z'
-  },
-  {
-    id: 'seed-2',
-    slug: 'energy-supply-shock',
-    title: '能源供应扰动观察',
-    summary: '供应端扰动仍可能放大油价波动。',
-    content: '能源市场仍受地缘与库存变化影响，交易节奏偏快。',
-    riskNotice: '注意波动风险与仓位控制。',
-    status: 'published',
-    publishedAt: '2026-06-06T09:30:00Z'
-  }
-];
-
 const fallbackAnnouncements: AnnouncementItem[] = [
   {
     id: 'ann-1',
@@ -93,18 +69,18 @@ export async function getPublishedArticles() {
       .order('published_at', { ascending: false });
 
     if (error || !data?.length) {
-      return fallbackArticles;
+      return [];
     }
 
     return data.map((row) => mapArticle(row));
   } catch {
-    return fallbackArticles;
+    return [];
   }
 }
 
 export async function getArticleBySlug(slug: string) {
   const articles = await getPublishedArticles();
-  return articles.find((article) => article.slug === slug) ?? articles[0];
+  return articles.find((article) => article.slug === slug) ?? null;
 }
 
 export async function getAnyArticleBySlug(slug: string) {
@@ -118,13 +94,13 @@ export async function getAnyArticleBySlug(slug: string) {
 
     if (error || !data) {
       const articles = await getPublishedArticles();
-      return articles.find((article) => article.slug === slug) ?? articles[0];
+      return articles.find((article) => article.slug === slug) ?? null;
     }
 
     return mapArticle(data);
   } catch {
     const articles = await getPublishedArticles();
-    return articles.find((article) => article.slug === slug) ?? articles[0];
+    return articles.find((article) => article.slug === slug) ?? null;
   }
 }
 
@@ -157,11 +133,11 @@ export async function getDraftArticles() {
       .order('updated_at', { ascending: false });
 
     if (error || !data?.length) {
-      return fallbackArticles.filter((article) => article.status === 'draft');
+      return [];
     }
 
     return data.map((row) => mapArticle(row));
   } catch {
-    return fallbackArticles.filter((article) => article.status === 'draft');
+    return [];
   }
 }

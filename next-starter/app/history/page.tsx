@@ -13,7 +13,7 @@ export default async function HistoryPage() {
 
       <section className="hero-card" style={{ marginTop: 16 }}>
         <div className="stack-list">
-          {archive.map((item) => (
+          {archive.length > 0 ? archive.map((item) => (
             <article key={item.id} className="stack-item">
               <div>
                 <strong>{item.title}</strong>
@@ -21,7 +21,12 @@ export default async function HistoryPage() {
               </div>
               <a href={`/today/${item.slug}`}>查看</a>
             </article>
-          ))}
+          )) : (
+            <article className="stack-item">
+              <strong>暂无历史洞察</strong>
+              <span className="subtle">管理员发布文章后，这里会自动显示。</span>
+            </article>
+          )}
         </div>
       </section>
     </main>
