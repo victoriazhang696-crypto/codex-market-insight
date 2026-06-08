@@ -1,13 +1,13 @@
 import { getAnyArticleBySlug } from '@/lib/content';
 import { ArticleEditorForm } from './editor-form';
 
-type Params = {
+export default async function AdminArticleEditorPage({
+  params
+}: {
   params: Promise<{
     slug: string;
   }>;
-};
-
-export default async function AdminArticleEditorPage({ params }: Params) {
+}) {
   const { slug } = await params;
   const article = await getAnyArticleBySlug(slug);
 
