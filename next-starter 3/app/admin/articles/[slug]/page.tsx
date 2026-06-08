@@ -2,13 +2,14 @@ import { getAnyArticleBySlug } from '@/lib/content';
 import { ArticleEditorForm } from './editor-form';
 
 type Params = {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 };
 
 export default async function AdminArticleEditorPage({ params }: Params) {
-  const article = await getAnyArticleBySlug(params.slug);
+  const { slug } = await params;
+  const article = await getAnyArticleBySlug(slug);
 
   return (
     <main className="page-shell">
