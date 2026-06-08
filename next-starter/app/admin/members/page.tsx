@@ -2,58 +2,37 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 
+type Member = {
+  id: string;
+  account_number: string;
+  full_name: string | null;
+  phone: string | null;
+  expire_date: string | null;
+  status: string;
+};
+
 export default function AdminMembersPage() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [members, setMembers] = useState<Array<{
-    id: string;
-    account_number: string;
-    full_name: string | null;
-    phone: string | null;
-    expire_date: string | null;
-    status: string;
-  }>>([]);
+  const [members, setMembers] = useState<Member[]>([]);
+
+  async function loadMembers() {
+    try {
+      const response = await fetch('/api/admin/members', { cache: 'no-store' });
+      const payload = (await response.json()) as {
+        ok: boolean;
+        members?: Member[];
+        message?: string;
+      };
+      if (payload.ok && payload.members) {
+        setMembers(payload.members);
+      }
+    } catch {
+      setMembers([]);
+    }
+  }
 
   useEffect(() => {
-    async function loadMembers() {
-      try {
-        const response = await fetch('/api/admin/members');
-        const payload = (await response.json()) as {
-          ok: boolean;
-          members?: Array<{
-            id: string;
-            account_number: string;
-            full_name: string | null;
-            phone: string | null;
-            expire_date: string | null;
-            status: string;
-          }>;
-        };
-        if (payload.ok && payload.members) {
-          setMembers(payload.members);
-        }
-      } catch {
-        setMembers([
-          {
-            id: 'seed-1',
-            account_number: '10002888',
-            full_name: '张先生',
-            phone: '60123456789',
-            expire_date: '2026-12-31',
-            status: 'active'
-          },
-          {
-            id: 'seed-2',
-            account_number: '10002889',
-            full_name: '李女士',
-            phone: '60123456790',
-            expire_date: '2026-06-30',
-            status: 'expired'
-          }
-        ]);
-      }
-    }
-
     void loadMembers();
   }, []);
 
@@ -80,7 +59,13 @@ export default function AdminMembersPage() {
       });
 
       const result = (await response.json()) as { ok: boolean; message?: string };
-      setMessage(result.ok ? '客户创建请求已提交。' : result.message ?? '创建失败');
+      if (result.ok) {
+        setMessage(`客户创建成功。账号：${payload.accountNumber}，密码：${payload.phone}`);
+        await loadMembers();
+        event.currentTarget.reset();
+      } else {
+        setMessage(result.message ?? '创建失败');
+      }
     } catch {
       setMessage('网络请求失败');
     } finally {
@@ -103,19 +88,19 @@ export default function AdminMembersPage() {
         <form className="form-grid" onSubmit={onSubmit}>
           <label>
             <span className="label">8位账号</span>
-            <input name="accountNumber" placeholder="10002888" />
+            <input name="accountNumber" placeholder="10002888" required />
           </label>
           <label>
             <span className="label">姓名</span>
-            <input name="fullName" placeholder="张先生" />
+            <input name="fullName" placeholder="张先生" required />
           </label>
           <label>
             <span className="label">手机号</span>
-            <input name="phone" placeholder="60123456789" />
+            <input name="phone" placeholder="60123456789" required />
           </label>
           <label>
             <span className="label">到期时间</span>
-            <input name="expireDate" placeholder="2026-12-31" />
+            <input name="expireDate" placeholder="2026-12-31" type="date" required />
           </label>
           <button
             className="primary-button"
@@ -144,7 +129,7 @@ export default function AdminMembersPage() {
               </tr>
             </thead>
             <tbody>
-              {members.map((member) => (
+              {members.length > 0 ? members.map((member) => (
                 <tr key={member.id}>
                   <td>{member.account_number}</td>
                   <td>{member.full_name}</td>
@@ -153,7 +138,11 @@ export default function AdminMembersPage() {
                   <td>{member.status}</td>
                   <td><a href={`/admin/members/${member.id}`}>编辑 / 续期 / 禁用</a></td>
                 </tr>
-              ))}
+              )) : (
+                <tr>
+                  <td colSpan={6}>暂无客户</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
