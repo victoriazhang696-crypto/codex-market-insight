@@ -102,6 +102,12 @@ export async function getPublishedArticlesByCategory(category: ArticleCategory) 
   return articles.filter((article) => article.category === category);
 }
 
+export async function getPublishedArticlesByCategories(categories: ArticleCategory[]) {
+  const allowed = new Set(categories);
+  const articles = await getPublishedArticles();
+  return articles.filter((article) => allowed.has(article.category));
+}
+
 export async function getArticleBySlug(slug: string) {
   const decodedSlug = decodeURIComponent(slug);
 

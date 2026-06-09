@@ -1,7 +1,24 @@
-import { getPublishedArticlesByCategory } from '@/lib/content';
+import { getPublishedArticlesByCategories } from '@/lib/content';
+import { canCurrentMemberAccess } from '@/lib/member-profile';
 
 export default async function HistoryPage() {
-  const archive = await getPublishedArticlesByCategory('market_today');
+  const canAccess = await canCurrentMemberAccess('market_history');
+  if (!canAccess) {
+    return (
+      <main className="page-shell">
+        <section className="hero-card dark">
+          <p className="eyebrow">历史洞察</p>
+          <h1>该栏目暂未开通</h1>
+          <p className="lede">请联系顾问开通历史洞察权限。</p>
+          <div className="inline-actions">
+            <a className="secondary-link" href="/">返回首页</a>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  const archive = await getPublishedArticlesByCategories(['market_today', 'market_history']);
 
   return (
     <main className="page-shell">

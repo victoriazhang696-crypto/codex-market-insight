@@ -1,7 +1,24 @@
 import { getArticlePreviewBlocks } from '@/lib/article-format';
 import { getPublishedArticlesByCategory } from '@/lib/content';
+import { canCurrentMemberAccess } from '@/lib/member-profile';
 
 export default async function TodayPage() {
+  const canAccess = await canCurrentMemberAccess('market_today');
+  if (!canAccess) {
+    return (
+      <main className="page-shell">
+        <section className="hero-card dark">
+          <p className="eyebrow">今日洞察</p>
+          <h1>该栏目暂未开通</h1>
+          <p className="lede">请联系顾问开通市场洞察权限。</p>
+          <div className="inline-actions">
+            <a className="secondary-link" href="/">返回首页</a>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
   const articles = await getPublishedArticlesByCategory('market_today');
   const article = articles[0];
 

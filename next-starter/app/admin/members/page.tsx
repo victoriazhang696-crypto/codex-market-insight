@@ -2,6 +2,8 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 
+import { defaultMemberPermissions, featurePermissions, normalizeFeaturePermissions, type FeaturePermission } from '@/lib/feature-permissions';
+
 type Member = {
   id: string;
   account_number: string;
@@ -9,6 +11,7 @@ type Member = {
   phone: string | null;
   expire_date: string | null;
   status: string;
+  feature_permissions?: FeaturePermission[] | null;
 };
 
 export default function AdminMembersPage() {
@@ -47,7 +50,8 @@ export default function AdminMembersPage() {
       accountNumber: String(formData.get('accountNumber') ?? ''),
       fullName: String(formData.get('fullName') ?? ''),
       phone: String(formData.get('phone') ?? ''),
-      expireDate: String(formData.get('expireDate') ?? '')
+      expireDate: String(formData.get('expireDate') ?? ''),
+      permissions: formData.getAll('permissions').map(String) as FeaturePermission[]
     };
 
     try {
@@ -103,6 +107,22 @@ export default function AdminMembersPage() {
             <span className="label">到期时间</span>
             <input name="expireDate" placeholder="2026-12-31" type="date" required />
           </label>
+          <fieldset className="form-fieldset">
+            <legend>开通权限</legend>
+            <div className="permission-grid">
+              {featurePermissions.map((item) => (
+                <label key={item.value} className="checkbox-row permission-option">
+                  <input
+                    type="checkbox"
+                    name="permissions"
+                    value={item.value}
+                    defaultChecked={defaultMemberPermissions.includes(item.value)}
+                  />
+                  <span>{item.label}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
           <button
             className="primary-button"
             type="submit"
@@ -126,6 +146,7 @@ export default function AdminMembersPage() {
                 <th>手机号</th>
                 <th>到期</th>
                 <th>状态</th>
+                <th>权限</th>
                 <th>操作</th>
               </tr>
             </thead>
@@ -137,11 +158,18 @@ export default function AdminMembersPage() {
                   <td>{member.phone}</td>
                   <td>{member.expire_date}</td>
                   <td>{member.status}</td>
+                  <td>
+                    {normalizeFeaturePermissions(member.feature_permissions).map((permission) => (
+                      <span key={permission} className="mini-badge">
+                        {featurePermissions.find((item) => item.value === permission)?.label ?? permission}
+                      </span>
+                    ))}
+                  </td>
                   <td><a href={`/admin/members/${member.id}`}>编辑 / 续期 / 禁用</a></td>
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={6}>暂无客户</td>
+                  <td colSpan={7}>暂无客户</td>
                 </tr>
               )}
             </tbody>

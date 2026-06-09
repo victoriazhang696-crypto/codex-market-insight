@@ -1,37 +1,44 @@
 import { getCurrentMemberProfile } from '@/lib/member-profile';
+import { hasFeaturePermission, type FeaturePermission } from '@/lib/feature-permissions';
 
 const highlights = [
   {
     title: '今日洞察',
     body: '查看今日市场研究内容、摘要和风险提示。',
-    href: '/today'
+    href: '/today',
+    permission: 'market_today'
   },
   {
     title: '历史洞察',
     body: '按月份和关键词回看已发布观点。',
-    href: '/history'
+    href: '/history',
+    permission: 'market_history'
   },
   {
     title: '公告通知',
     body: '直播、更新和会员提醒统一查看。',
-    href: '/announcements'
+    href: '/announcements',
+    permission: 'member_notice'
   },
   {
     title: '陪跑专项',
     body: '专项陪跑内容、策略提醒和重点复盘。',
-    href: '/specials'
+    href: '/specials',
+    permission: 'paipao_special'
   },
   {
     title: 'US复盘简报',
     body: '美股市场复盘、重点资产和机会追踪。',
-    href: '/us-review'
+    href: '/us-review',
+    permission: 'us_review'
   },
   {
     title: '待解锁 AI 服务',
     body: '预留 AI 市场助理、股票分析和更多会员服务。',
-    href: '/soon'
+    href: '/soon',
+    permission: 'ai_service'
   }
-];
+] satisfies Array<{ title: string; body: string; href: string; permission: FeaturePermission }>;
 
 export const dynamic = 'force-dynamic';
 
@@ -89,10 +96,17 @@ export default async function MemberHomePage() {
       <section className="card-grid">
         {highlights.map((item) => (
           <article key={item.title} className="feature-card">
-            <a href={item.href}>
+            {hasFeaturePermission(profile?.featurePermissions, item.permission) ? (
+              <a href={item.href}>
+                <h2>{item.title}</h2>
+              </a>
+            ) : (
               <h2>{item.title}</h2>
-            </a>
+            )}
             <p>{item.body}</p>
+            <span className={hasFeaturePermission(profile?.featurePermissions, item.permission) ? 'mini-badge active' : 'mini-badge'}>
+              {hasFeaturePermission(profile?.featurePermissions, item.permission) ? '已开通' : '未开通'}
+            </span>
           </article>
         ))}
       </section>

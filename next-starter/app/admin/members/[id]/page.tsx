@@ -3,6 +3,8 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 
+import { featurePermissions, normalizeFeaturePermissions, type FeaturePermission } from '@/lib/feature-permissions';
+
 type MemberRecord = {
   id: string;
   account_number: string;
@@ -10,6 +12,7 @@ type MemberRecord = {
   phone: string | null;
   expire_date: string | null;
   status: string;
+  feature_permissions?: FeaturePermission[] | null;
 };
 
 export default function AdminMemberEditorPage() {
@@ -34,7 +37,8 @@ export default function AdminMemberEditorPage() {
           full_name: '张先生',
           phone: '60123456789',
           expire_date: '2026-12-31',
-          status: 'active'
+          status: 'active',
+          feature_permissions: ['market_today', 'market_history']
         });
       }
     }
@@ -53,7 +57,8 @@ export default function AdminMemberEditorPage() {
       fullName: String(formData.get('fullName') ?? ''),
       phone: String(formData.get('phone') ?? ''),
       expireDate: String(formData.get('expireDate') ?? ''),
-      status: String(formData.get('status') ?? 'active') as 'active' | 'expired' | 'disabled'
+      status: String(formData.get('status') ?? 'active') as 'active' | 'expired' | 'disabled',
+      permissions: formData.getAll('permissions').map(String) as FeaturePermission[]
     };
 
     try {
@@ -121,6 +126,22 @@ export default function AdminMemberEditorPage() {
               <option value="disabled">disabled</option>
             </select>
           </label>
+          <fieldset className="form-fieldset">
+            <legend>栏目权限</legend>
+            <div className="permission-grid">
+              {featurePermissions.map((item) => (
+                <label key={item.value} className="checkbox-row permission-option">
+                  <input
+                    type="checkbox"
+                    name="permissions"
+                    value={item.value}
+                    defaultChecked={normalizeFeaturePermissions(member.feature_permissions).includes(item.value)}
+                  />
+                  <span>{item.label}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
           <button className="primary-button" type="submit" disabled={loading}>
             {loading ? '保存中...' : '保存客户'}
           </button>

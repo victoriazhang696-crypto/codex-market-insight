@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { normalizeFeaturePermissions, type FeaturePermission } from '@/lib/feature-permissions';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 type Params = {
@@ -11,6 +12,7 @@ type MemberUpdateBody = {
   phone?: string;
   expireDate?: string;
   status?: 'active' | 'expired' | 'disabled';
+  permissions?: FeaturePermission[];
 };
 
 export async function PATCH(request: Request, { params }: Params) {
@@ -18,19 +20,36 @@ export async function PATCH(request: Request, { params }: Params) {
   const body = (await request.json()) as MemberUpdateBody;
   const supabase = createSupabaseAdminClient();
 
-  const updates: Record<string, string> = {};
+  const updates: Record<string, string | FeaturePermission[]> = {};
 
   if (body.fullName !== undefined) updates.full_name = body.fullName.trim();
   if (body.phone !== undefined) updates.phone = body.phone.trim();
   if (body.expireDate !== undefined) updates.expire_date = body.expireDate.trim();
   if (body.status !== undefined) updates.status = body.status;
+  if (body.permissions !== undefined) updates.feature_permissions = normalizeFeaturePermissions(body.permissions);
 
   const { data, error } = await supabase
     .from('profiles')
     .update(updates)
     .eq('id', id)
-    .select('id, account_number, full_name, phone, expire_date, status')
+    .select('id, account_number, full_name, phone, expire_date, status, feature_permissions')
     .single();
+
+  if (error && error.message.toLowerCase().includes('feature_permissions')) {
+    const { feature_permissions: _featurePermissions, ...legacyUpdates } = updates;
+    const legacyResult = await supabase
+      .from('profiles')
+      .update(legacyUpdates)
+      .eq('id', id)
+      .select('id, account_number, full_name, phone, expire_date, status')
+      .single();
+
+    if (legacyResult.error) {
+      return NextResponse.json({ ok: false, message: legacyResult.error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ ok: true, member: legacyResult.data });
+  }
 
   if (error) {
     return NextResponse.json({ ok: false, message: error.message }, { status: 500 });
@@ -44,12 +63,25 @@ export async function GET(request: Request, { params }: Params) {
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, account_number, full_name, phone, expire_date, status')
+    .select('id, account_number, full_name, phone, expire_date, status, feature_permissions')
     .eq('id', id)
     .single();
 
   if (error) {
-    return NextResponse.json({ ok: false, message: error.message }, { status: 500 });
+    const fallbackResult = await supabase
+      .from('profiles')
+      .select('id, account_number, full_name, phone, expire_date, status')
+      .eq('id', id)
+      .single();
+
+    if (fallbackResult.error) {
+      return NextResponse.json({ ok: false, message: fallbackResult.error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      ok: true,
+      member: fallbackResult.data
+    });
   }
 
   return NextResponse.json({

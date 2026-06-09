@@ -1,6 +1,23 @@
 import { getPublishedArticlesByCategory } from '@/lib/content';
+import { canCurrentMemberAccess } from '@/lib/member-profile';
 
 export default async function UsReviewPage() {
+  const canAccess = await canCurrentMemberAccess('us_review');
+  if (!canAccess) {
+    return (
+      <main className="page-shell">
+        <section className="hero-card dark">
+          <p className="eyebrow">US复盘简报</p>
+          <h1>该栏目暂未开通</h1>
+          <p className="lede">你的账号目前没有 US 复盘简报权限。</p>
+          <div className="inline-actions">
+            <a className="secondary-link" href="/">返回首页</a>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
   const articles = await getPublishedArticlesByCategory('us_review');
 
   return (

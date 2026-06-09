@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { accountNumberToEmail, isEightDigitAccountNumber, normalizePhonePassword } from '@/lib/account';
+import { defaultMemberPermissions, normalizeFeaturePermissions, type FeaturePermission } from '@/lib/feature-permissions';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 type MemberCreateBody = {
@@ -8,6 +9,7 @@ type MemberCreateBody = {
   fullName?: string;
   phone?: string;
   expireDate?: string;
+  permissions?: FeaturePermission[];
 };
 
 export async function POST(request: Request) {
@@ -16,6 +18,7 @@ export async function POST(request: Request) {
   const fullName = body.fullName?.trim() ?? '';
   const phone = normalizePhonePassword(body.phone ?? '');
   const expireDate = body.expireDate?.trim() ?? '';
+  const permissions = normalizeFeaturePermissions(body.permissions ?? defaultMemberPermissions);
 
   if (!isEightDigitAccountNumber(accountNumber)) {
     return NextResponse.json({ ok: false, message: 'Account number must be 8 digits.' }, { status: 400 });
@@ -52,7 +55,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, message: 'Auth user was not created.' }, { status: 500 });
   }
 
-  const { error: profileError } = await supabase.from('profiles').insert({
+  const profilePayload = {
     id: userId,
     account_number: accountNumber,
     full_name: fullName,
@@ -60,8 +63,30 @@ export async function POST(request: Request) {
     email,
     role: 'member',
     expire_date: expireDate,
-    status: 'active'
-  });
+    status: 'active',
+    feature_permissions: permissions
+  };
+
+  const { error: profileError } = await supabase.from('profiles').insert(profilePayload);
+
+  if (profileError && profileError.message.toLowerCase().includes('feature_permissions')) {
+    const { feature_permissions: _featurePermissions, ...legacyPayload } = profilePayload;
+    const legacyResult = await supabase.from('profiles').insert(legacyPayload);
+
+    if (legacyResult.error) {
+      return NextResponse.json({ ok: false, message: legacyResult.error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      ok: true,
+      member: {
+        id: userId,
+        accountNumber,
+        email,
+        password: phone
+      }
+    });
+  }
 
   if (profileError) {
     return NextResponse.json({ ok: false, message: profileError.message }, { status: 500 });
@@ -82,12 +107,25 @@ export async function GET() {
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, account_number, full_name, phone, expire_date, status')
+    .select('id, account_number, full_name, phone, expire_date, status, feature_permissions')
     .eq('role', 'member')
     .order('created_at', { ascending: false });
 
   if (error) {
-    return NextResponse.json({ ok: false, message: error.message }, { status: 500 });
+    const fallbackResult = await supabase
+      .from('profiles')
+      .select('id, account_number, full_name, phone, expire_date, status')
+      .eq('role', 'member')
+      .order('created_at', { ascending: false });
+
+    if (fallbackResult.error) {
+      return NextResponse.json({ ok: false, message: fallbackResult.error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      ok: true,
+      members: fallbackResult.data ?? []
+    });
   }
 
   return NextResponse.json({

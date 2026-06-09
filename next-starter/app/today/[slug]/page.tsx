@@ -1,5 +1,6 @@
 import { splitArticleBlocks } from '@/lib/article-format';
 import { getArticleBySlug, getArticleCategoryLabel } from '@/lib/content';
+import { canCurrentMemberAccess } from '@/lib/member-profile';
 
 type Params = {
   params: Promise<{
@@ -27,6 +28,23 @@ export default async function TodayArticlePage({ params }: Params) {
   }
 
   const categoryLabel = getArticleCategoryLabel(article.category);
+  const canAccess = await canCurrentMemberAccess(article.category);
+
+  if (!canAccess) {
+    return (
+      <main className="page-shell">
+        <section className="hero-card dark">
+          <p className="eyebrow">{categoryLabel}</p>
+          <h1>该栏目暂未开通</h1>
+          <p className="lede">你的账号目前没有阅读该栏目内容的权限。</p>
+          <div className="inline-actions">
+            <a className="secondary-link" href="/">返回首页</a>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
   const articleBlocks = splitArticleBlocks(article.content);
 
   return (

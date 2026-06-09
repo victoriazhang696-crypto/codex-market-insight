@@ -1,10 +1,15 @@
-export type ArticleCategory = 'market_today' | 'paipao_special' | 'us_review' | 'member_notice' | 'ai_service';
+export type ArticleCategory = 'market_today' | 'market_history' | 'paipao_special' | 'us_review' | 'member_notice' | 'ai_service';
 
 export const articleCategories: Array<{ value: ArticleCategory; label: string; description: string }> = [
   {
     value: 'market_today',
     label: '今日洞察',
     description: '发布到会员前端的今日市场洞察，并进入历史洞察。'
+  },
+  {
+    value: 'market_history',
+    label: '历史洞察',
+    description: '补发昨天或更早的市场洞察，只进入历史洞察。'
   },
   {
     value: 'paipao_special',

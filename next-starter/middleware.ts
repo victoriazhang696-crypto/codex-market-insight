@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { createSupabaseMiddlewareClient } from '@/lib/supabase/middleware';
 
 const publicPaths = ['/login', '/admin-login'];
-const memberPaths = ['/', '/today', '/history', '/announcements', '/soon'];
+const memberPathPrefixes = ['/', '/today', '/history', '/announcements', '/soon', '/specials', '/us-review'];
 
 async function getRole(request: NextRequest, response: NextResponse) {
   const supabase = createSupabaseMiddlewareClient(request, response);
@@ -55,7 +55,7 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  if (memberPaths.includes(pathname)) {
+  if (memberPathPrefixes.some((path) => pathname === path || (path !== '/' && pathname.startsWith(`${path}/`)))) {
     const session = await getRole(request, response);
 
     if (!session.userId) {
@@ -83,5 +83,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/', '/today', '/history', '/announcements', '/soon', '/login', '/admin-login']
+  matcher: ['/admin/:path*', '/', '/today/:path*', '/history/:path*', '/announcements/:path*', '/soon/:path*', '/specials/:path*', '/us-review/:path*', '/login', '/admin-login']
 };

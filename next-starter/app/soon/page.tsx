@@ -1,3 +1,5 @@
+import { canCurrentMemberAccess } from '@/lib/member-profile';
+
 const roadmap = [
   'AI 市场助理',
   '股票分析中心',
@@ -5,7 +7,23 @@ const roadmap = [
   '课程中心'
 ];
 
-export default function SoonPage() {
+export default async function SoonPage() {
+  const canAccess = await canCurrentMemberAccess('ai_service');
+  if (!canAccess) {
+    return (
+      <main className="page-shell">
+        <section className="hero-card dark">
+          <p className="eyebrow">待解锁 AI 服务</p>
+          <h1>该栏目暂未开通</h1>
+          <p className="lede">后续如需体验 AI 市场助理或股票分析，可联系顾问开通。</p>
+          <div className="inline-actions">
+            <a className="secondary-link" href="/">返回首页</a>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="page-shell">
       <section className="hero-card dark">
