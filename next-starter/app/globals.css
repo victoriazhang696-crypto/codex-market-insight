@@ -870,6 +870,99 @@ h1 {
   color: #5ea0ff;
 }
 
+.member-topbar.compact {
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.member-topbar.compact h1 {
+  font-size: clamp(32px, 3.6vw, 52px);
+}
+
+.member-return-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid rgba(117, 157, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #dce7ff;
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.member-page-panel,
+.market-article-panel {
+  border: 1px solid rgba(117, 157, 255, 0.2);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(9, 28, 61, 0.78), rgba(4, 17, 39, 0.92));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+}
+
+.member-page-panel {
+  padding: 28px;
+}
+
+.market-article-panel {
+  padding: 34px;
+  margin-bottom: 18px;
+}
+
+.member-list {
+  display: grid;
+  gap: 12px;
+}
+
+.member-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 20px;
+  border: 1px solid rgba(117, 157, 255, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.member-list-row strong {
+  color: #fff;
+  font-size: 18px;
+}
+
+.member-list-row span {
+  display: block;
+  margin-top: 6px;
+  color: #91a2c3;
+}
+
+.member-list-row a {
+  color: #6da2ff;
+  text-decoration: none;
+  font-weight: 900;
+}
+
+.page-card-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 0;
+}
+
+.article-reader-panel {
+  max-width: 1020px;
+  margin: 0 auto;
+}
+
+.article-reader-panel .inline-actions {
+  margin-bottom: 22px;
+}
+
+.empty-state {
+  min-height: 260px;
+  display: grid;
+  place-content: center;
+}
+
 @media (max-width: 900px) {
   .hero-grid,
   .card-grid,
@@ -967,6 +1060,28 @@ h1 {
   }
 
   .dashboard-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .member-topbar.compact {
+    align-items: flex-start;
+  }
+
+  .member-return-link {
+    width: fit-content;
+  }
+
+  .member-page-panel,
+  .market-article-panel {
+    padding: 20px;
+  }
+
+  .member-list-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .page-card-grid {
     grid-template-columns: 1fr;
   }
 }

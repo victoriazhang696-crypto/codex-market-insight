@@ -1,21 +1,17 @@
 import { getArticlePreviewBlocks } from '@/lib/article-format';
 import { getTodaysMarketArticles } from '@/lib/content';
 import { canCurrentMemberAccess } from '@/lib/member-profile';
+import MemberFrame from '../member-frame';
 
 export default async function TodayPage() {
   const canAccess = await canCurrentMemberAccess('market_today');
   if (!canAccess) {
     return (
-      <main className="page-shell">
-        <section className="hero-card dark">
-          <p className="eyebrow">今日洞察</p>
-          <h1>该栏目暂未开通</h1>
+      <MemberFrame activePath="/today" eyebrow="今日洞察" title="该栏目暂未开通">
+        <section className="member-page-panel empty-state">
           <p className="lede">请联系顾问开通市场洞察权限。</p>
-          <div className="inline-actions">
-            <a className="secondary-link" href="/">返回首页</a>
-          </div>
         </section>
-      </main>
+      </MemberFrame>
     );
   }
 
@@ -24,35 +20,28 @@ export default async function TodayPage() {
 
   if (!article) {
     return (
-      <main className="page-shell">
-        <section className="hero-card dark">
-          <p className="eyebrow">今日洞察</p>
-          <h1>暂无已发布洞察</h1>
+      <MemberFrame activePath="/today" eyebrow="Today Insight" title="暂无已发布洞察">
+        <section className="member-page-panel empty-state">
           <p className="lede">管理员发布文章后，会员会在这里看到最新内容。</p>
-          <div className="inline-actions">
-            <a className="secondary-link" href="/">返回首页</a>
-          </div>
         </section>
-      </main>
+      </MemberFrame>
     );
   }
 
   const previewBlocks = getArticlePreviewBlocks(article.content);
 
   return (
-    <main className="page-shell">
-      <section className="hero-card dark article-hero">
-        <p className="eyebrow">今日洞察</p>
+    <MemberFrame activePath="/today" eyebrow="Today Insight" title="今日市场洞察">
+      <section className="market-article-panel article-hero">
         <h1>{article.title}</h1>
         <p className="lede">{article.summary}</p>
         <div className="inline-actions">
           <a className="primary-link" href={`/today/${article.slug}`}>查看全文</a>
           <a className="secondary-link" href="/history">查看历史洞察</a>
-          <a className="secondary-link" href="/">返回首页</a>
         </div>
       </section>
 
-      <section className="hero-card" style={{ marginTop: 16 }}>
+      <section className="member-page-panel">
         <div className="section-heading-row">
           <div>
             <p className="eyebrow">Preview</p>
@@ -75,6 +64,6 @@ export default async function TodayPage() {
           ) : null}
         </div>
       </section>
-    </main>
+    </MemberFrame>
   );
 }

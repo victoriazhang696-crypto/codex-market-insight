@@ -1,54 +1,46 @@
 import { getPublishedArticlesByCategory } from '@/lib/content';
 import { canCurrentMemberAccess } from '@/lib/member-profile';
+import MemberFrame from '../member-frame';
 
 export default async function UsReviewPage() {
   const canAccess = await canCurrentMemberAccess('us_review');
   if (!canAccess) {
     return (
-      <main className="page-shell">
-        <section className="hero-card dark">
-          <p className="eyebrow">US复盘简报</p>
-          <h1>该栏目暂未开通</h1>
+      <MemberFrame activePath="/us-review" eyebrow="US复盘简报" title="该栏目暂未开通">
+        <section className="member-page-panel empty-state">
           <p className="lede">你的账号目前没有 US 复盘简报权限。</p>
-          <div className="inline-actions">
-            <a className="secondary-link" href="/">返回首页</a>
-          </div>
         </section>
-      </main>
+      </MemberFrame>
     );
   }
 
   const articles = await getPublishedArticlesByCategory('us_review');
 
   return (
-    <main className="page-shell">
-      <section className="hero-card dark">
-        <p className="eyebrow">US复盘简报</p>
-        <h1>US 市场复盘</h1>
-        <p className="lede">这里显示后台发布到“US复盘简报”的会员内容。</p>
-        <div className="inline-actions">
-          <a className="secondary-link" href="/">返回首页</a>
-        </div>
-      </section>
-
-      <section className="hero-card" style={{ marginTop: 16 }}>
-        <div className="stack-list">
+    <MemberFrame
+      activePath="/us-review"
+      eyebrow="US Review"
+      title="US 市场复盘"
+      description="这里显示后台发布到“US复盘简报”的会员内容。"
+    >
+      <section className="member-page-panel">
+        <div className="member-list">
           {articles.length > 0 ? articles.map((item) => (
-            <article key={item.id} className="stack-item">
+            <article key={item.id} className="member-list-row">
               <div>
                 <strong>{item.title}</strong>
-                <span className="subtle">{item.publishedAt ?? '已发布'}</span>
+                <span>{item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('zh-CN') : '已发布'}</span>
               </div>
               <a href={`/today/${item.slug}`}>查看</a>
             </article>
           )) : (
-            <article className="stack-item">
+            <article className="member-list-row">
               <strong>暂无 US 复盘简报</strong>
-              <span className="subtle">后台发布到该栏目后，这里会自动显示。</span>
+              <span>后台发布到该栏目后，这里会自动显示。</span>
             </article>
           )}
         </div>
       </section>
-    </main>
+    </MemberFrame>
   );
 }
