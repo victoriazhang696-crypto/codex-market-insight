@@ -292,10 +292,42 @@ h1 {
 }
 
 .permission-option {
+  display: grid;
+  gap: 8px;
   padding: 10px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.03);
+}
+
+.permission-option input[type="date"] {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--ink);
+}
+
+.compact-actions {
+  margin-top: 0;
+  justify-content: flex-end;
+}
+
+.danger-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 95, 95, 0.42);
+  border-radius: 10px;
+  background: rgba(255, 95, 95, 0.08);
+  color: #ffb3b3;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
 }
 
 .mini-badge {

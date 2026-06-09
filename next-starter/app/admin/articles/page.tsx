@@ -28,6 +28,44 @@ export default function AdminArticlesPage() {
     void loadDrafts();
   }, []);
 
+  async function updateArticleStatus(id: string, status: 'draft' | 'published') {
+    setMessage(status === 'published' ? '正在发布文章...' : '正在隐藏文章...');
+
+    try {
+      const response = await fetch(`/api/admin/articles/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status })
+      });
+      const result = (await response.json()) as { ok: boolean; message?: string };
+      setMessage(result.ok ? (status === 'published' ? '文章已发布。' : '文章已隐藏，前端客户不可见。') : result.message ?? '操作失败');
+      await loadDrafts();
+    } catch {
+      setMessage('网络请求失败');
+    }
+  }
+
+  async function deleteArticle(id: string) {
+    if (!window.confirm('确认删除这篇文章？删除后不可恢复。')) {
+      return;
+    }
+
+    setMessage('正在删除文章...');
+
+    try {
+      const response = await fetch(`/api/admin/articles/${id}`, {
+        method: 'DELETE'
+      });
+      const result = (await response.json()) as { ok: boolean; message?: string };
+      setMessage(result.ok ? '文章已删除。' : result.message ?? '删除失败');
+      await loadDrafts();
+    } catch {
+      setMessage('网络请求失败');
+    }
+  }
+
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
@@ -77,6 +115,9 @@ export default function AdminArticlesPage() {
         <p className="eyebrow">Staff Only</p>
         <h1>文章发布</h1>
         <p className="lede">把标题、正文、摘要和风险提示放在一个工作区里，准备好后发布给会员前端。</p>
+        <div className="inline-actions">
+          <a className="secondary-link" href="/admin">返回后台首页</a>
+        </div>
       </section>
 
       <section className="hero-card" style={{ marginTop: 16 }}>
@@ -133,10 +174,18 @@ export default function AdminArticlesPage() {
               <div>
                 <strong>{item.title}</strong>
                 <span className="subtle">
-                  {getArticleCategoryLabel(item.content_category ?? 'market_today')} · {item.status}
+                  {getArticleCategoryLabel(item.content_category ?? 'market_today')} · {item.status === 'published' ? '已发布/前端可见' : '已隐藏/草稿'}
                 </span>
               </div>
-              <a href={`/admin/articles/${item.slug}`}>编辑 / 预览</a>
+              <div className="inline-actions compact-actions">
+                <a href={`/admin/articles/${item.slug}`}>编辑 / 预览</a>
+                {item.status === 'published' ? (
+                  <button className="secondary-button" type="button" onClick={() => void updateArticleStatus(item.id, 'draft')}>隐藏</button>
+                ) : (
+                  <button className="secondary-button" type="button" onClick={() => void updateArticleStatus(item.id, 'published')}>发布</button>
+                )}
+                <button className="danger-button" type="button" onClick={() => void deleteArticle(item.id)}>删除</button>
+              </div>
             </article>
           )) : (
             <article className="stack-item">

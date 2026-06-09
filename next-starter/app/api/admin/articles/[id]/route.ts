@@ -95,3 +95,18 @@ export async function GET(request: Request, { params }: Params) {
     article: data
   });
 }
+
+export async function DELETE(request: Request, { params }: Params) {
+  const { id } = await params;
+  const supabase = createSupabaseAdminClient();
+  const { error } = await supabase
+    .from('articles')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    return NextResponse.json({ ok: false, message: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true });
+}

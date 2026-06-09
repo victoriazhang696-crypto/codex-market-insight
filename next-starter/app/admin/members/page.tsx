@@ -2,7 +2,14 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 
-import { defaultMemberPermissions, featurePermissions, normalizeFeaturePermissions, type FeaturePermission } from '@/lib/feature-permissions';
+import {
+  defaultMemberPermissions,
+  featurePermissions,
+  normalizeFeatureExpiries,
+  normalizeFeaturePermissions,
+  type FeatureExpiries,
+  type FeaturePermission
+} from '@/lib/feature-permissions';
 
 type Member = {
   id: string;
@@ -12,7 +19,16 @@ type Member = {
   expire_date: string | null;
   status: string;
   feature_permissions?: FeaturePermission[] | null;
+  feature_expiries?: FeatureExpiries | null;
 };
+
+function collectPermissionExpiries(formData: FormData) {
+  return Object.fromEntries(
+    featurePermissions
+      .map((item) => [item.value, String(formData.get(`expiry_${item.value}`) ?? '').trim()])
+      .filter(([, value]) => value)
+  );
+}
 
 export default function AdminMembersPage() {
   const [message, setMessage] = useState('');
@@ -51,7 +67,8 @@ export default function AdminMembersPage() {
       fullName: String(formData.get('fullName') ?? ''),
       phone: String(formData.get('phone') ?? ''),
       expireDate: String(formData.get('expireDate') ?? ''),
-      permissions: formData.getAll('permissions').map(String) as FeaturePermission[]
+      permissions: formData.getAll('permissions').map(String) as FeaturePermission[],
+      permissionExpiries: collectPermissionExpiries(formData)
     };
 
     try {
@@ -111,15 +128,19 @@ export default function AdminMembersPage() {
             <legend>开通权限</legend>
             <div className="permission-grid">
               {featurePermissions.map((item) => (
-                <label key={item.value} className="checkbox-row permission-option">
-                  <input
-                    type="checkbox"
-                    name="permissions"
-                    value={item.value}
-                    defaultChecked={defaultMemberPermissions.includes(item.value)}
-                  />
-                  <span>{item.label}</span>
-                </label>
+                <div key={item.value} className="permission-option">
+                  <label className="checkbox-row">
+                    <input
+                      type="checkbox"
+                      name="permissions"
+                      value={item.value}
+                      defaultChecked={defaultMemberPermissions.includes(item.value)}
+                    />
+                    <span>{item.label}</span>
+                  </label>
+                  <input name={`expiry_${item.value}`} type="date" aria-label={`${item.label} 单独到期日`} />
+                  <span className="subtle">留空使用总到期时间</span>
+                </div>
               ))}
             </div>
           </fieldset>
@@ -162,6 +183,9 @@ export default function AdminMembersPage() {
                     {normalizeFeaturePermissions(member.feature_permissions).map((permission) => (
                       <span key={permission} className="mini-badge">
                         {featurePermissions.find((item) => item.value === permission)?.label ?? permission}
+                        {normalizeFeatureExpiries(member.feature_expiries)[permission]
+                          ? ` 至 ${normalizeFeatureExpiries(member.feature_expiries)[permission]}`
+                          : ''}
                       </span>
                     ))}
                   </td>

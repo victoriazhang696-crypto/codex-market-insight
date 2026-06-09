@@ -1,4 +1,4 @@
-import { getPublishedArticlesByCategories } from '@/lib/content';
+import { getHistoricalMarketArticles } from '@/lib/content';
 import { canCurrentMemberAccess } from '@/lib/member-profile';
 
 export default async function HistoryPage() {
@@ -18,7 +18,7 @@ export default async function HistoryPage() {
     );
   }
 
-  const archive = await getPublishedArticlesByCategories(['market_today', 'market_history']);
+  const archive = await getHistoricalMarketArticles();
 
   return (
     <main className="page-shell">

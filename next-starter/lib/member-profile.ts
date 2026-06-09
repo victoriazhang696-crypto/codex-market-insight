@@ -1,5 +1,12 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { hasFeaturePermission, normalizeFeaturePermissions, type FeaturePermission } from '@/lib/feature-permissions';
+import {
+  hasActiveFeaturePermission,
+  isDateActive,
+  normalizeFeatureExpiries,
+  normalizeFeaturePermissions,
+  type FeatureExpiries,
+  type FeaturePermission
+} from '@/lib/feature-permissions';
 
 export type MemberProfile = {
   accountNumber: string;
@@ -7,6 +14,7 @@ export type MemberProfile = {
   expireDate: string | null;
   status: string;
   featurePermissions: FeaturePermission[];
+  featureExpiries: FeatureExpiries;
   remainingDays: number | null;
 };
 
@@ -32,7 +40,7 @@ export async function getCurrentMemberProfile(): Promise<MemberProfile | null> {
 
   const { data } = await supabase
     .from('profiles')
-    .select('account_number, full_name, expire_date, status, feature_permissions')
+    .select('account_number, full_name, expire_date, status, feature_permissions, feature_expiries')
     .eq('id', authData.user.id)
     .single();
 
@@ -53,6 +61,7 @@ export async function getCurrentMemberProfile(): Promise<MemberProfile | null> {
       expireDate: fallbackResult.data.expire_date ?? null,
       status: fallbackResult.data.status ?? 'active',
       featurePermissions: normalizeFeaturePermissions(null),
+      featureExpiries: {},
       remainingDays: getRemainingDays(fallbackResult.data.expire_date ?? null)
     };
   }
@@ -63,6 +72,7 @@ export async function getCurrentMemberProfile(): Promise<MemberProfile | null> {
     expireDate: data.expire_date ?? null,
     status: data.status ?? 'active',
     featurePermissions: normalizeFeaturePermissions(data.feature_permissions),
+    featureExpiries: normalizeFeatureExpiries(data.feature_expiries),
     remainingDays: getRemainingDays(data.expire_date ?? null)
   };
 }
@@ -74,5 +84,9 @@ export async function canCurrentMemberAccess(feature: FeaturePermission) {
     return false;
   }
 
-  return hasFeaturePermission(profile.featurePermissions, feature);
+  if (profile.status !== 'active' || !isDateActive(profile.expireDate)) {
+    return false;
+  }
+
+  return hasActiveFeaturePermission(profile.featurePermissions, profile.featureExpiries, feature, profile.expireDate);
 }

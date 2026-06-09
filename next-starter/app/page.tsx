@@ -1,5 +1,5 @@
 import { getCurrentMemberProfile } from '@/lib/member-profile';
-import { hasFeaturePermission, type FeaturePermission } from '@/lib/feature-permissions';
+import { hasActiveFeaturePermission, type FeaturePermission } from '@/lib/feature-permissions';
 
 const highlights = [
   {
@@ -44,6 +44,8 @@ export const dynamic = 'force-dynamic';
 
 export default async function MemberHomePage() {
   const profile = await getCurrentMemberProfile();
+  const canUse = (permission: FeaturePermission) =>
+    hasActiveFeaturePermission(profile?.featurePermissions, profile?.featureExpiries, permission, profile?.expireDate);
   const expireText = profile?.expireDate ?? '未设置';
   const remainingText =
     profile?.remainingDays === null || profile?.remainingDays === undefined
@@ -96,7 +98,7 @@ export default async function MemberHomePage() {
       <section className="card-grid">
         {highlights.map((item) => (
           <article key={item.title} className="feature-card">
-            {hasFeaturePermission(profile?.featurePermissions, item.permission) ? (
+            {canUse(item.permission) ? (
               <a href={item.href}>
                 <h2>{item.title}</h2>
               </a>
@@ -104,8 +106,8 @@ export default async function MemberHomePage() {
               <h2>{item.title}</h2>
             )}
             <p>{item.body}</p>
-            <span className={hasFeaturePermission(profile?.featurePermissions, item.permission) ? 'mini-badge active' : 'mini-badge'}>
-              {hasFeaturePermission(profile?.featurePermissions, item.permission) ? '已开通' : '未开通'}
+            <span className={canUse(item.permission) ? 'mini-badge active' : 'mini-badge'}>
+              {canUse(item.permission) ? '已开通' : '未开通'}
             </span>
           </article>
         ))}

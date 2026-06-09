@@ -108,6 +108,37 @@ export async function getPublishedArticlesByCategories(categories: ArticleCatego
   return articles.filter((article) => allowed.has(article.category));
 }
 
+function getMalaysiaDate(value: string) {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Kuala_Lumpur',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(new Date(value));
+}
+
+function getTodayInMalaysia() {
+  return getMalaysiaDate(new Date().toISOString());
+}
+
+export function isPublishedTodayInMalaysia(article: ContentArticle) {
+  if (!article.publishedAt) {
+    return false;
+  }
+
+  return getMalaysiaDate(article.publishedAt) === getTodayInMalaysia();
+}
+
+export async function getTodaysMarketArticles() {
+  const articles = await getPublishedArticlesByCategory('market_today');
+  return articles.filter((article) => isPublishedTodayInMalaysia(article));
+}
+
+export async function getHistoricalMarketArticles() {
+  const articles = await getPublishedArticlesByCategories(['market_today', 'market_history']);
+  return articles.filter((article) => article.category === 'market_history' || !isPublishedTodayInMalaysia(article));
+}
+
 export async function getArticleBySlug(slug: string) {
   const decodedSlug = decodeURIComponent(slug);
 

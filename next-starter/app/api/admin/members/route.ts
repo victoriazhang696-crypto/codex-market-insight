@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 
 import { accountNumberToEmail, isEightDigitAccountNumber, normalizePhonePassword } from '@/lib/account';
-import { defaultMemberPermissions, normalizeFeaturePermissions, type FeaturePermission } from '@/lib/feature-permissions';
+import {
+  defaultMemberPermissions,
+  normalizeFeatureExpiries,
+  normalizeFeaturePermissions,
+  type FeatureExpiries,
+  type FeaturePermission
+} from '@/lib/feature-permissions';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 type MemberCreateBody = {
@@ -10,6 +16,7 @@ type MemberCreateBody = {
   phone?: string;
   expireDate?: string;
   permissions?: FeaturePermission[];
+  permissionExpiries?: FeatureExpiries;
 };
 
 export async function POST(request: Request) {
@@ -19,6 +26,7 @@ export async function POST(request: Request) {
   const phone = normalizePhonePassword(body.phone ?? '');
   const expireDate = body.expireDate?.trim() ?? '';
   const permissions = normalizeFeaturePermissions(body.permissions ?? defaultMemberPermissions);
+  const permissionExpiries = normalizeFeatureExpiries(body.permissionExpiries);
 
   if (!isEightDigitAccountNumber(accountNumber)) {
     return NextResponse.json({ ok: false, message: 'Account number must be 8 digits.' }, { status: 400 });
@@ -64,13 +72,14 @@ export async function POST(request: Request) {
     role: 'member',
     expire_date: expireDate,
     status: 'active',
-    feature_permissions: permissions
+    feature_permissions: permissions,
+    feature_expiries: permissionExpiries
   };
 
   const { error: profileError } = await supabase.from('profiles').insert(profilePayload);
 
-  if (profileError && profileError.message.toLowerCase().includes('feature_permissions')) {
-    const { feature_permissions: _featurePermissions, ...legacyPayload } = profilePayload;
+  if (profileError && (profileError.message.toLowerCase().includes('feature_permissions') || profileError.message.toLowerCase().includes('feature_expiries'))) {
+    const { feature_permissions: _featurePermissions, feature_expiries: _featureExpiries, ...legacyPayload } = profilePayload;
     const legacyResult = await supabase.from('profiles').insert(legacyPayload);
 
     if (legacyResult.error) {
@@ -107,7 +116,7 @@ export async function GET() {
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, account_number, full_name, phone, expire_date, status, feature_permissions')
+    .select('id, account_number, full_name, phone, expire_date, status, feature_permissions, feature_expiries')
     .eq('role', 'member')
     .order('created_at', { ascending: false });
 

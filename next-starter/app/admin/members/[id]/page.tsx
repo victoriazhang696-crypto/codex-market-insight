@@ -3,7 +3,13 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 
-import { featurePermissions, normalizeFeaturePermissions, type FeaturePermission } from '@/lib/feature-permissions';
+import {
+  featurePermissions,
+  normalizeFeatureExpiries,
+  normalizeFeaturePermissions,
+  type FeatureExpiries,
+  type FeaturePermission
+} from '@/lib/feature-permissions';
 
 type MemberRecord = {
   id: string;
@@ -13,7 +19,16 @@ type MemberRecord = {
   expire_date: string | null;
   status: string;
   feature_permissions?: FeaturePermission[] | null;
+  feature_expiries?: FeatureExpiries | null;
 };
+
+function collectPermissionExpiries(formData: FormData) {
+  return Object.fromEntries(
+    featurePermissions
+      .map((item) => [item.value, String(formData.get(`expiry_${item.value}`) ?? '').trim()])
+      .filter(([, value]) => value)
+  );
+}
 
 export default function AdminMemberEditorPage() {
   const params = useParams();
@@ -38,7 +53,8 @@ export default function AdminMemberEditorPage() {
           phone: '60123456789',
           expire_date: '2026-12-31',
           status: 'active',
-          feature_permissions: ['market_today', 'market_history']
+          feature_permissions: ['market_today', 'market_history'],
+          feature_expiries: {}
         });
       }
     }
@@ -58,7 +74,8 @@ export default function AdminMemberEditorPage() {
       phone: String(formData.get('phone') ?? ''),
       expireDate: String(formData.get('expireDate') ?? ''),
       status: String(formData.get('status') ?? 'active') as 'active' | 'expired' | 'disabled',
-      permissions: formData.getAll('permissions').map(String) as FeaturePermission[]
+      permissions: formData.getAll('permissions').map(String) as FeaturePermission[],
+      permissionExpiries: collectPermissionExpiries(formData)
     };
 
     try {
@@ -130,15 +147,24 @@ export default function AdminMemberEditorPage() {
             <legend>栏目权限</legend>
             <div className="permission-grid">
               {featurePermissions.map((item) => (
-                <label key={item.value} className="checkbox-row permission-option">
+                <div key={item.value} className="permission-option">
+                  <label className="checkbox-row">
+                    <input
+                      type="checkbox"
+                      name="permissions"
+                      value={item.value}
+                      defaultChecked={normalizeFeaturePermissions(member.feature_permissions).includes(item.value)}
+                    />
+                    <span>{item.label}</span>
+                  </label>
                   <input
-                    type="checkbox"
-                    name="permissions"
-                    value={item.value}
-                    defaultChecked={normalizeFeaturePermissions(member.feature_permissions).includes(item.value)}
+                    name={`expiry_${item.value}`}
+                    type="date"
+                    aria-label={`${item.label} 单独到期日`}
+                    defaultValue={normalizeFeatureExpiries(member.feature_expiries)[item.value] ?? ''}
                   />
-                  <span>{item.label}</span>
-                </label>
+                  <span className="subtle">留空使用总到期时间</span>
+                </div>
               ))}
             </div>
           </fieldset>

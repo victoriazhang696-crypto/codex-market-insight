@@ -1,6 +1,7 @@
 import { articleCategories, type ArticleCategory } from '@/lib/article-categories';
 
 export type FeaturePermission = ArticleCategory;
+export type FeatureExpiries = Partial<Record<FeaturePermission, string>>;
 
 export const defaultMemberPermissions: FeaturePermission[] = ['market_today', 'market_history', 'member_notice'];
 
@@ -24,4 +25,45 @@ export function normalizeFeaturePermissions(value: unknown): FeaturePermission[]
 export function hasFeaturePermission(permissions: FeaturePermission[] | null | undefined, feature: FeaturePermission) {
   const normalized = permissions?.length ? permissions : defaultMemberPermissions;
   return normalized.includes(feature);
+}
+
+export function normalizeFeatureExpiries(value: unknown): FeatureExpiries {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return {};
+  }
+
+  const allowed = new Set(featurePermissions.map((item) => item.value));
+  const entries = Object.entries(value as Record<string, unknown>).filter(
+    (entry): entry is [FeaturePermission, string] =>
+      allowed.has(entry[0] as FeaturePermission) && typeof entry[1] === 'string' && entry[1].trim().length > 0
+  );
+
+  return Object.fromEntries(entries);
+}
+
+export function isDateActive(expireDate: string | null | undefined) {
+  if (!expireDate) {
+    return true;
+  }
+
+  const today = new Date();
+  const end = new Date(`${expireDate}T23:59:59`);
+  return today.getTime() <= end.getTime();
+}
+
+export function getFeatureExpireDate(featureExpiries: FeatureExpiries | null | undefined, feature: FeaturePermission, fallbackDate?: string | null) {
+  return featureExpiries?.[feature] || fallbackDate || null;
+}
+
+export function hasActiveFeaturePermission(
+  permissions: FeaturePermission[] | null | undefined,
+  featureExpiries: FeatureExpiries | null | undefined,
+  feature: FeaturePermission,
+  fallbackExpireDate?: string | null
+) {
+  if (!hasFeaturePermission(permissions, feature)) {
+    return false;
+  }
+
+  return isDateActive(getFeatureExpireDate(featureExpiries, feature, fallbackExpireDate));
 }

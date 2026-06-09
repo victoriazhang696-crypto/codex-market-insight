@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { normalizeFeaturePermissions, type FeaturePermission } from '@/lib/feature-permissions';
+import { normalizeFeatureExpiries, normalizeFeaturePermissions, type FeatureExpiries, type FeaturePermission } from '@/lib/feature-permissions';
 import { createSupabaseAdminClient } from '@/lib/supabase/admin';
 
 type Params = {
@@ -13,6 +13,7 @@ type MemberUpdateBody = {
   expireDate?: string;
   status?: 'active' | 'expired' | 'disabled';
   permissions?: FeaturePermission[];
+  permissionExpiries?: FeatureExpiries;
 };
 
 export async function PATCH(request: Request, { params }: Params) {
@@ -20,23 +21,24 @@ export async function PATCH(request: Request, { params }: Params) {
   const body = (await request.json()) as MemberUpdateBody;
   const supabase = createSupabaseAdminClient();
 
-  const updates: Record<string, string | FeaturePermission[]> = {};
+  const updates: Record<string, string | FeaturePermission[] | FeatureExpiries> = {};
 
   if (body.fullName !== undefined) updates.full_name = body.fullName.trim();
   if (body.phone !== undefined) updates.phone = body.phone.trim();
   if (body.expireDate !== undefined) updates.expire_date = body.expireDate.trim();
   if (body.status !== undefined) updates.status = body.status;
   if (body.permissions !== undefined) updates.feature_permissions = normalizeFeaturePermissions(body.permissions);
+  if (body.permissionExpiries !== undefined) updates.feature_expiries = normalizeFeatureExpiries(body.permissionExpiries);
 
   const { data, error } = await supabase
     .from('profiles')
     .update(updates)
     .eq('id', id)
-    .select('id, account_number, full_name, phone, expire_date, status, feature_permissions')
+    .select('id, account_number, full_name, phone, expire_date, status, feature_permissions, feature_expiries')
     .single();
 
-  if (error && error.message.toLowerCase().includes('feature_permissions')) {
-    const { feature_permissions: _featurePermissions, ...legacyUpdates } = updates;
+  if (error && (error.message.toLowerCase().includes('feature_permissions') || error.message.toLowerCase().includes('feature_expiries'))) {
+    const { feature_permissions: _featurePermissions, feature_expiries: _featureExpiries, ...legacyUpdates } = updates;
     const legacyResult = await supabase
       .from('profiles')
       .update(legacyUpdates)
@@ -63,7 +65,7 @@ export async function GET(request: Request, { params }: Params) {
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, account_number, full_name, phone, expire_date, status, feature_permissions')
+    .select('id, account_number, full_name, phone, expire_date, status, feature_permissions, feature_expiries')
     .eq('id', id)
     .single();
 

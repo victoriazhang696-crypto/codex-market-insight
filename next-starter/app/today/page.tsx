@@ -1,5 +1,5 @@
 import { getArticlePreviewBlocks } from '@/lib/article-format';
-import { getPublishedArticlesByCategory } from '@/lib/content';
+import { getTodaysMarketArticles } from '@/lib/content';
 import { canCurrentMemberAccess } from '@/lib/member-profile';
 
 export default async function TodayPage() {
@@ -19,7 +19,7 @@ export default async function TodayPage() {
     );
   }
 
-  const articles = await getPublishedArticlesByCategory('market_today');
+  const articles = await getTodaysMarketArticles();
   const article = articles[0];
 
   if (!article) {
