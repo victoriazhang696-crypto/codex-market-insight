@@ -1,16 +1,17 @@
 import { hasActiveFeaturePermission, type FeaturePermission } from '@/lib/feature-permissions';
 import { getCurrentMemberProfile } from '@/lib/member-profile';
+import MemberNav from './member-nav';
 
 const sidebarItems = [
-  { label: '首页', href: '/', permission: 'market_today' },
-  { label: '市场洞察', href: '/today', permission: 'market_today' },
-  { label: '公告通知', href: '/announcements', permission: 'member_notice', badge: '3' },
-  { label: '历史洞察', href: '/history', permission: 'market_history' },
-  { label: 'US复盘简报', href: '/us-review', permission: 'us_review' },
-  { label: '待解锁AI服务', href: '/soon', permission: 'ai_service' },
-  { label: '陪跑专项', href: '/specials', permission: 'paipao_special' },
-  { label: '退出登录', href: '/logout', permission: 'member_notice' }
-] satisfies Array<{ label: string; href: string; permission: FeaturePermission; badge?: string }>;
+  { label: '首页', href: '/', permission: 'market_today', icon: '01' },
+  { label: '市场洞察', href: '/today', permission: 'market_today', icon: '02' },
+  { label: '公告通知', href: '/announcements', permission: 'member_notice', icon: '03' },
+  { label: '历史洞察', href: '/history', permission: 'market_history', icon: '04' },
+  { label: 'US复盘简报', href: '/us-review', permission: 'us_review', icon: '05' },
+  { label: '待解锁AI服务', href: '/soon', permission: 'ai_service', icon: '06' },
+  { label: '陪跑专项', href: '/specials', permission: 'paipao_special', icon: '07' },
+  { label: '退出登录', href: '/logout', permission: 'member_notice', icon: '08' }
+] satisfies Array<{ label: string; href: string; permission: FeaturePermission; icon: string }>;
 
 type Props = {
   activePath: string;
@@ -30,31 +31,16 @@ export default async function MemberFrame({ activePath, eyebrow, title, descript
           <img src="/homilychart-malaysia-logo-cutout.png" alt="HomilyChart Malaysia" />
           <span>HomilyChart Malaysia</span>
         </a>
-        <nav className="member-nav" aria-label="会员功能导航">
-          {sidebarItems.map((item) => {
-            const isAllowed = item.href === '/logout' || Boolean(
+        <MemberNav
+          ariaLabel="会员功能导航"
+          items={sidebarItems.map((item) => {
+            const enabled = item.href === '/logout' || Boolean(
               profile?.status === 'active' &&
               hasActiveFeaturePermission(profile.featurePermissions, profile.featureExpiries, item.permission, profile.expireDate)
             );
-            const isActive = activePath === item.href;
-            return (
-              <a
-                key={item.href}
-                className={`${isActive ? 'active' : ''} ${isAllowed ? '' : 'locked'}`}
-                href={isAllowed || item.href === '/logout' ? item.href : '/soon'}
-              >
-                <span className="nav-icon">{isAllowed ? '◆' : '▣'}</span>
-                <span>{item.label}</span>
-                {item.badge ? <strong>{item.badge}</strong> : null}
-              </a>
-            );
+            return { ...item, enabled, active: activePath === item.href };
           })}
-        </nav>
-        <section className="upgrade-card">
-          <strong>VIP 会员</strong>
-          <p>解锁全部 AI 洞察功能与专属内容。</p>
-          <a className="primary-link" href="/soon">查看权益</a>
-        </section>
+        />
       </aside>
 
       <section className="member-main">

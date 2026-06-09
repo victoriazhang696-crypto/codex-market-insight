@@ -1,74 +1,82 @@
-import { getCurrentMemberProfile } from '@/lib/member-profile';
+import { getAnnouncements, getPublishedArticles, isPublishedTodayInMalaysia } from '@/lib/content';
 import { hasActiveFeaturePermission, type FeaturePermission } from '@/lib/feature-permissions';
+import { getCurrentMemberProfile } from '@/lib/member-profile';
+import MemberNav, { type MemberNavItem } from './member-nav';
 
-const highlights = [
+const serviceCards = [
   {
-    title: '今日洞察',
-    body: '查看今日市场研究内容、摘要和风险提示。',
+    title: '市场洞察',
+    body: '今日核心观点、风险提示和完整市场解读。',
     href: '/today',
-    permission: 'market_today'
+    permission: 'market_today',
+    tone: 'blue'
   },
   {
     title: '历史洞察',
-    body: '按月份和关键词回看已发布观点。',
+    body: '自动收纳过往观点，便于回看和复盘。',
     href: '/history',
-    permission: 'market_history'
+    permission: 'market_history',
+    tone: 'violet'
   },
   {
     title: '公告通知',
-    body: '直播、更新和会员提醒统一查看。',
+    body: '直播安排、会员通知和功能更新。',
     href: '/announcements',
-    permission: 'member_notice'
+    permission: 'member_notice',
+    tone: 'rose'
+  },
+  {
+    title: 'US复盘简报',
+    body: '美股市场表现、资金流向和重点板块。',
+    href: '/us-review',
+    permission: 'us_review',
+    tone: 'green'
+  },
+  {
+    title: '待解锁AI服务',
+    body: 'AI 市场助理、智能选股和风险预警。',
+    href: '/soon',
+    permission: 'ai_service',
+    tone: 'cyan'
   },
   {
     title: '陪跑专项',
     body: '专项陪跑内容、策略提醒和重点复盘。',
     href: '/specials',
-    permission: 'paipao_special'
-  },
-  {
-    title: 'US复盘简报',
-    body: '美股市场复盘、重点资产和机会追踪。',
-    href: '/us-review',
-    permission: 'us_review'
-  },
-  {
-    title: '待解锁 AI 服务',
-    body: '预留 AI 市场助理、股票分析和更多会员服务。',
-    href: '/soon',
-    permission: 'ai_service'
+    permission: 'paipao_special',
+    tone: 'gold'
   }
-] satisfies Array<{ title: string; body: string; href: string; permission: FeaturePermission }>;
+] satisfies Array<{ title: string; body: string; href: string; permission: FeaturePermission; tone: string }>;
 
 const sidebarItems = [
-  { label: '首页', href: '/', permission: 'market_today' },
-  { label: '市场洞察', href: '/today', permission: 'market_today' },
-  { label: '公告通知', href: '/announcements', permission: 'member_notice', badge: '3' },
-  { label: '历史洞察', href: '/history', permission: 'market_history' },
-  { label: 'US复盘简报', href: '/us-review', permission: 'us_review' },
-  { label: '待解锁AI服务', href: '/soon', permission: 'ai_service' },
-  { label: '陪跑专项', href: '/specials', permission: 'paipao_special' },
-  { label: '退出登录', href: '/logout', permission: 'member_notice' }
-] satisfies Array<{ label: string; href: string; permission: FeaturePermission; badge?: string }>;
-
-const announcements = [
-  ['系统维护通知', '2026-06-08 10:00'],
-  ['新功能上线：AI智能选股', '2026-06-07 15:30'],
-  ['会员权益调整公告', '2026-06-06 09:00']
-];
-
-const historyItems = [
-  ['美股科技股深度分析', '2026-06-07'],
-  ['新能源产业链周报', '2026-06-06'],
-  ['半导体行业研究报告', '2026-06-05']
-];
+  { label: '首页', href: '/', permission: 'market_today', icon: '01' },
+  { label: '市场洞察', href: '/today', permission: 'market_today', icon: '02' },
+  { label: '公告通知', href: '/announcements', permission: 'member_notice', icon: '03' },
+  { label: '历史洞察', href: '/history', permission: 'market_history', icon: '04' },
+  { label: 'US复盘简报', href: '/us-review', permission: 'us_review', icon: '05' },
+  { label: '待解锁AI服务', href: '/soon', permission: 'ai_service', icon: '06' },
+  { label: '陪跑专项', href: '/specials', permission: 'paipao_special', icon: '07' },
+  { label: '退出登录', href: '/logout', permission: 'member_notice', icon: '08' }
+] satisfies Array<{ label: string; href: string; permission: FeaturePermission; icon: string }>;
 
 export const dynamic = 'force-dynamic';
 
 export default async function MemberHomePage() {
-  const profile = await getCurrentMemberProfile();
+  const [profile, publishedArticles, notices] = await Promise.all([
+    getCurrentMemberProfile(),
+    getPublishedArticles(),
+    getAnnouncements()
+  ]);
+
   const canUse = (permission: FeaturePermission) =>
     hasActiveFeaturePermission(profile?.featurePermissions, profile?.featureExpiries, permission, profile?.expireDate);
+
+  const todaysMarketArticles = publishedArticles.filter((article) => article.category === 'market_today' && isPublishedTodayInMalaysia(article));
+  const historicalMarketArticles = publishedArticles
+    .filter((article) => article.category === 'market_history' || (article.category === 'market_today' && !isPublishedTodayInMalaysia(article)))
+    .slice(0, 3);
+  const latestToday = todaysMarketArticles[0];
+
   const expireText = profile?.expireDate ?? '未设置';
   const remainingText =
     profile?.remainingDays === null || profile?.remainingDays === undefined
@@ -77,12 +85,25 @@ export default async function MemberHomePage() {
         ? `${profile.remainingDays} 天`
         : '已到期';
 
-  const benefitItems = [
-    '全部AI洞察功能',
-    '专属AI智能服务',
-    '高级风险预警',
-    '专属客服支持'
-  ];
+  const navItems: MemberNavItem[] = sidebarItems.map((item) => {
+    const enabled = item.href === '/logout' || canUse(item.permission);
+    const badgeCount = item.href === '/today' ? todaysMarketArticles.length : item.href === '/announcements' ? notices.length : 0;
+    const badgeSignature =
+      item.href === '/today'
+        ? todaysMarketArticles.map((article) => article.id).join('|')
+        : item.href === '/announcements'
+          ? notices.map((notice) => notice.id).join('|')
+          : '';
+
+    return {
+      ...item,
+      enabled,
+      active: item.href === '/',
+      badgeCount,
+      badgeKey: badgeCount > 0 ? item.href : undefined,
+      badgeSignature
+    };
+  });
 
   return (
     <main className="member-dashboard">
@@ -91,62 +112,33 @@ export default async function MemberHomePage() {
           <img src="/homilychart-malaysia-logo-cutout.png" alt="HomilyChart Malaysia" />
           <span>Homily Malaysia</span>
         </a>
-        <nav className="member-nav" aria-label="会员导航">
-          {sidebarItems.map((item, index) => {
-            const active = item.href === '/';
-            const enabled = item.href === '/logout' || canUse(item.permission);
-            return (
-              <a
-                key={item.href}
-                className={active ? 'active' : enabled ? '' : 'locked'}
-                href={enabled ? item.href : '#'}
-                aria-disabled={!enabled}
-              >
-                <span className="nav-icon">{String(index + 1).padStart(2, '0')}</span>
-                <span>{item.label}</span>
-                {item.badge ? <strong>{item.badge}</strong> : null}
-              </a>
-            );
-          })}
-        </nav>
-
-        <section className="upgrade-card">
-          <span className="crown-mark">VIP</span>
-          <h2>升级会员</h2>
-          <p>解锁全部AI洞察功能和专项权益。</p>
-          <a href="/soon">立即升级</a>
-        </section>
+        <MemberNav items={navItems} ariaLabel="会员导航" />
       </aside>
 
       <section className="member-main">
-        <header className="member-topbar">
-          <div>
+        <section className="member-home-stage">
+          <div className="member-welcome">
             <p className="eyebrow">Market Intelligence Center</p>
-            <h1>欢迎来到市场洞察中心</h1>
+            <h1>欢迎来到大马专属AI服务中心</h1>
             <p>AI 驱动的市场洞察与分析，帮您把握每一个投资机会。</p>
-          </div>
-          <div className="member-user-chip">
-            <span>{profile?.fullName ?? 'Member'}</span>
-            <strong>{profile?.accountNumber ?? '已登录'}</strong>
-          </div>
-        </header>
-
-        <div className="dashboard-grid">
-          <section className="market-hero-card">
-            <div className="market-hero-copy">
-              <span className="hot-label">今日核心洞察</span>
-              <h2>算力已成新金本位，科技巨头开启新一轮军备竞赛</h2>
-              <p>
-                随着 AI 大模型持续迭代，算力基础设施成为科技竞争的核心壁垒。英伟达最新财报超预期，揭示 AI 算力需求仍处于爆发前夜。
-              </p>
-              <a href="/today">查看完整洞察</a>
+            <div className="hero-visual" aria-hidden="true">
+              <span className="bull-mark">◆</span>
+              <span className="ai-mark">AI</span>
+              <span className="tower tower-left" />
+              <span className="tower tower-right" />
             </div>
-            <img src="/member-dashboard-visual.png" alt="AI market intelligence visual" />
-          </section>
+          </div>
 
           <aside className="vip-panel">
+            <div className="vip-profile-row">
+              <div className="member-avatar">{(profile?.fullName ?? 'M').slice(0, 1).toUpperCase()}</div>
+              <div>
+                <strong>{profile?.fullName ?? 'Member'}</strong>
+                <span>{profile?.accountNumber ?? '已登录'}</span>
+              </div>
+            </div>
             <div className="vip-title-row">
-              <span>VIP 会员</span>
+              <span>大马会员</span>
               <strong>尊享版</strong>
             </div>
             <dl>
@@ -168,45 +160,37 @@ export default async function MemberHomePage() {
               </div>
             </dl>
             <a className="renew-button" href="/soon">续费会员</a>
-            <div className="benefit-list">
-              {benefitItems.map((item) => (
-                <span key={item}>{item}</span>
-              ))}
-            </div>
           </aside>
-        </div>
+        </section>
 
-        <section className="dashboard-cards">
-          <article className="mini-service-card notice-card">
-            <div className="service-heading">
-              <span>公告通知</span>
-              <strong>3</strong>
-            </div>
-            {announcements.map(([title, time]) => (
-              <p key={title}><b>{title}</b><small>{time}</small></p>
-            ))}
-            <a href="/announcements">查看全部</a>
-          </article>
+        <section className="insight-strip">
+          <div>
+            <span>今日核心洞察</span>
+            <strong>{latestToday?.title ?? '今日洞察待更新'}</strong>
+            <p>{latestToday?.summary || '后台发布今日市场洞察后，这里会自动显示最新内容。'}</p>
+          </div>
+          <a href="/today">查看完整洞察</a>
+        </section>
 
-          <article className="mini-service-card">
-            <div className="service-heading">
-              <span>历史洞察</span>
-            </div>
-            {historyItems.map(([title, date]) => (
-              <p key={title}><b>{title}</b><small>{date}</small></p>
-            ))}
-            <a href="/history">查看全部</a>
-          </article>
-
-          {highlights.slice(3).map((item) => {
+        <section className="dashboard-cards compact-cards">
+          {serviceCards.map((item) => {
             const enabled = canUse(item.permission);
+            const preview =
+              item.href === '/announcements'
+                ? notices[0]?.title
+                : item.href === '/history'
+                  ? historicalMarketArticles[0]?.title
+                  : item.href === '/today'
+                    ? latestToday?.title
+                    : '';
+
             return (
-              <article key={item.title} className={enabled ? 'mini-service-card enabled-card' : 'mini-service-card locked-card'}>
+              <article key={item.title} className={`mini-service-card ${enabled ? 'enabled-card' : 'locked-card'} tone-${item.tone}`}>
                 <div className="service-heading">
                   <span>{item.title}</span>
                   <strong>{enabled ? 'ON' : 'LOCK'}</strong>
                 </div>
-                <p>{item.body}</p>
+                <p>{preview || item.body}</p>
                 <a href={enabled ? item.href : '/soon'}>{enabled ? '进入服务' : '了解解锁'}</a>
               </article>
             );

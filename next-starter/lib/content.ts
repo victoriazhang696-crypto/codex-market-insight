@@ -23,23 +23,6 @@ export type AnnouncementItem = {
   publishedAt?: string;
 };
 
-const fallbackAnnouncements: AnnouncementItem[] = [
-  {
-    id: 'ann-1',
-    title: '本周会员直播复盘将在周五 20:30 开始。',
-    body: '主题为黄金、能源与美元路径。',
-    status: 'published',
-    publishedAt: '2026-06-06T12:00:00Z'
-  },
-  {
-    id: 'ann-2',
-    title: '阅读体验升级：新增摘要和风险提示。',
-    body: '后续文章页会逐步统一到数据库渲染。',
-    status: 'published',
-    publishedAt: '2026-06-05T12:00:00Z'
-  }
-];
-
 function mapArticle(row: Record<string, unknown>): ContentArticle {
   return {
     id: String(row.id ?? ''),
@@ -204,12 +187,12 @@ export async function getAnnouncements() {
       .order('published_at', { ascending: false });
 
     if (error || !data?.length) {
-      return fallbackAnnouncements;
+      return [];
     }
 
     return data.map((row) => mapAnnouncement(row));
   } catch {
-    return fallbackAnnouncements;
+    return [];
   }
 }
 

@@ -24,7 +24,7 @@ export default async function AnnouncementsPage() {
       description="重要通知、直播安排与功能更新都会在这里集中发布。"
     >
       <section className="dashboard-cards page-card-grid">
-        {notices.map((notice) => (
+        {notices.length > 0 ? notices.map((notice) => (
           <article key={notice.id} className="mini-service-card notice-card">
             <div className="service-heading">
               <span>{notice.title}</span>
@@ -32,7 +32,14 @@ export default async function AnnouncementsPage() {
             </div>
             <p>{notice.body}</p>
           </article>
-        ))}
+        )) : (
+          <article className="mini-service-card">
+            <div className="service-heading">
+              <span>暂无公告</span>
+            </div>
+            <p>后台发布公告后，这里会自动显示给会员。</p>
+          </article>
+        )}
       </section>
     </MemberFrame>
   );
