@@ -1,4 +1,4 @@
-import { getArticlePreviewBlocks } from '@/lib/article-format';
+import { splitArticleBlocks } from '@/lib/article-format';
 import { getTodaysMarketArticles } from '@/lib/content';
 import { canCurrentMemberAccess } from '@/lib/member-profile';
 import MemberFrame from '../member-frame';
@@ -28,7 +28,7 @@ export default async function TodayPage() {
     );
   }
 
-  const previewBlocks = getArticlePreviewBlocks(article.content);
+  const articleBlocks = splitArticleBlocks(article.content);
 
   return (
     <MemberFrame activePath="/today" eyebrow="Today Insight" title="今日市场洞察">
@@ -36,33 +36,33 @@ export default async function TodayPage() {
         <h1>{article.title}</h1>
         <p className="lede">{article.summary}</p>
         <div className="inline-actions">
-          <a className="primary-link" href={`/today/${article.slug}`}>查看全文</a>
           <a className="secondary-link" href="/history">查看历史洞察</a>
         </div>
       </section>
 
-      <section className="member-page-panel">
+      <section className="market-article-panel article-reader-panel">
         <div className="section-heading-row">
           <div>
-            <p className="eyebrow">Preview</p>
-            <h2>核心预览</h2>
+            <p className="eyebrow">Full Article</p>
+            <h2>完整原文</h2>
           </div>
-          <span className="subtle">点击查看全文阅读完整内容</span>
         </div>
-        <div className="article-preview-list">
-          {previewBlocks.map((block, index) => (
-            <article key={`${block.heading ?? 'block'}-${index}`} className="article-preview-card">
-              {block.heading ? <h3>{block.heading}</h3> : null}
+        <section className="article-reader">
+          <div className="article-prose">
+            {articleBlocks.map((block, index) => (
+              <section key={`${block.heading ?? 'paragraph'}-${index}`} className={block.heading ? 'article-section' : 'article-lead-block'}>
+                {block.heading ? <h2>{block.heading}</h2> : null}
               <p>{block.body}</p>
-            </article>
-          ))}
+              </section>
+            ))}
+          </div>
           {article.riskNotice ? (
-            <article className="article-risk-card">
+            <aside className="article-risk-card">
               <span>风险提示</span>
               <strong>{article.riskNotice}</strong>
-            </article>
+            </aside>
           ) : null}
-        </div>
+        </section>
       </section>
     </MemberFrame>
   );

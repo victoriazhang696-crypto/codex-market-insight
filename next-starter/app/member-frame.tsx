@@ -29,7 +29,6 @@ export default async function MemberFrame({ activePath, eyebrow, title, descript
       <aside className="member-sidebar">
         <a className="member-logo" href="/">
           <img src="/homilychart-malaysia-logo-cutout.png" alt="HomilyChart Malaysia" />
-          <span>HomilyChart Malaysia</span>
         </a>
         <MemberNav
           ariaLabel="会员功能导航"
