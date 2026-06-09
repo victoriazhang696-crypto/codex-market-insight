@@ -15,16 +15,32 @@ export function splitArticleBlocks(content: string) {
     return [];
   }
 
-  return normalized
+  const rawParts = normalized
     .split(/\n{2,}/)
     .map((part) => part.trim())
-    .filter(Boolean)
+    .filter(Boolean);
+
+  const parts: string[] = [];
+
+  for (let index = 0; index < rawParts.length; index += 1) {
+    const part = rawParts[index];
+
+    if (part === '💡' && rawParts[index + 1]?.startsWith('【')) {
+      parts.push(`💡 ${rawParts[index + 1]}`);
+      index += 1;
+      continue;
+    }
+
+    parts.push(part);
+  }
+
+  return parts
     .map((part): ArticleBlock => {
-      const headingMatch = part.match(/^【([^】]+)】\s*(.*)$/s);
+      const headingMatch = part.match(/^(💡\s*)?【([^】]+)】\s*(.*)$/s);
       if (headingMatch) {
         return {
-          heading: headingMatch[1],
-          body: headingMatch[2].trim()
+          heading: `${headingMatch[1] ?? ''}${headingMatch[2]}`,
+          body: headingMatch[3].trim()
         };
       }
 

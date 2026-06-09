@@ -61,6 +61,30 @@ const sidebarItems = [
 
 export const dynamic = 'force-dynamic';
 
+function getMalaysiaMonthDay() {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Kuala_Lumpur',
+    month: 'numeric',
+    day: 'numeric'
+  }).formatToParts(new Date());
+
+  return {
+    month: parts.find((part) => part.type === 'month')?.value ?? '',
+    day: parts.find((part) => part.type === 'day')?.value ?? ''
+  };
+}
+
+function titleMatchesToday(title: string) {
+  const dateMatch = title.match(/(\d{1,2})[./月-](\d{1,2})\s*日?/);
+
+  if (!dateMatch) {
+    return true;
+  }
+
+  const today = getMalaysiaMonthDay();
+  return Number(dateMatch[1]) === Number(today.month) && Number(dateMatch[2]) === Number(today.day);
+}
+
 export default async function MemberHomePage() {
   const [profile, publishedArticles, notices] = await Promise.all([
     getCurrentMemberProfile(),
@@ -71,7 +95,9 @@ export default async function MemberHomePage() {
   const canUse = (permission: FeaturePermission) =>
     hasActiveFeaturePermission(profile?.featurePermissions, profile?.featureExpiries, permission, profile?.expireDate);
 
-  const todaysMarketArticles = publishedArticles.filter((article) => article.category === 'market_today' && isPublishedTodayInMalaysia(article));
+  const todaysMarketArticles = publishedArticles.filter(
+    (article) => article.category === 'market_today' && isPublishedTodayInMalaysia(article) && titleMatchesToday(article.title)
+  );
   const historicalMarketArticles = publishedArticles
     .filter((article) => article.category === 'market_history' || (article.category === 'market_today' && !isPublishedTodayInMalaysia(article)))
     .slice(0, 3);
@@ -110,7 +136,6 @@ export default async function MemberHomePage() {
       <aside className="member-sidebar">
         <a className="member-logo" href="/">
           <img src="/homilychart-malaysia-logo-cutout.png" alt="HomilyChart Malaysia" />
-          <span>Homily Malaysia</span>
         </a>
         <MemberNav items={navItems} ariaLabel="会员导航" />
       </aside>
@@ -122,10 +147,12 @@ export default async function MemberHomePage() {
             <h1>欢迎来到大马专属AI服务中心</h1>
             <p>AI 驱动的市场洞察与分析，帮您把握每一个投资机会。</p>
             <div className="hero-visual" aria-hidden="true">
-              <span className="bull-mark">◆</span>
               <span className="ai-mark">AI</span>
-              <span className="tower tower-left" />
-              <span className="tower tower-right" />
+              <span className="petronas-towers">
+                <i className="petronas-tower left" />
+                <i className="petronas-bridge" />
+                <i className="petronas-tower right" />
+              </span>
             </div>
           </div>
 
@@ -138,7 +165,6 @@ export default async function MemberHomePage() {
               </div>
             </div>
             <div className="vip-title-row">
-              <span>大马会员</span>
               <strong>尊享版</strong>
             </div>
             <dl>
@@ -181,7 +207,7 @@ export default async function MemberHomePage() {
                 : item.href === '/history'
                   ? historicalMarketArticles[0]?.title
                   : item.href === '/today'
-                    ? latestToday?.title
+                    ? latestToday?.summary
                     : '';
 
             return (
