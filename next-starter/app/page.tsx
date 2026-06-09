@@ -40,6 +40,29 @@ const highlights = [
   }
 ] satisfies Array<{ title: string; body: string; href: string; permission: FeaturePermission }>;
 
+const sidebarItems = [
+  { label: '首页', href: '/', permission: 'market_today' },
+  { label: '市场洞察', href: '/today', permission: 'market_today' },
+  { label: '公告通知', href: '/announcements', permission: 'member_notice', badge: '3' },
+  { label: '历史洞察', href: '/history', permission: 'market_history' },
+  { label: 'US复盘简报', href: '/us-review', permission: 'us_review' },
+  { label: '待解锁AI服务', href: '/soon', permission: 'ai_service' },
+  { label: '陪跑专项', href: '/specials', permission: 'paipao_special' },
+  { label: '退出登录', href: '/logout', permission: 'member_notice' }
+] satisfies Array<{ label: string; href: string; permission: FeaturePermission; badge?: string }>;
+
+const announcements = [
+  ['系统维护通知', '2026-06-08 10:00'],
+  ['新功能上线：AI智能选股', '2026-06-07 15:30'],
+  ['会员权益调整公告', '2026-06-06 09:00']
+];
+
+const historyItems = [
+  ['美股科技股深度分析', '2026-06-07'],
+  ['新能源产业链周报', '2026-06-06'],
+  ['半导体行业研究报告', '2026-06-05']
+];
+
 export const dynamic = 'force-dynamic';
 
 export default async function MemberHomePage() {
@@ -54,63 +77,141 @@ export default async function MemberHomePage() {
         ? `${profile.remainingDays} 天`
         : '已到期';
 
-  return (
-    <main className="page-shell">
-      <section className="hero-card">
-        <div className="brand-lockup">
-          <img src="/homilychart-malaysia-logo-cutout.png" alt="HomilyChart Malaysia" />
-          <p className="eyebrow">大马会员专属 AI 服务</p>
-        </div>
-        <div className="hero-grid">
-          <div>
-            <h1>欢迎回到你的市场情报中心</h1>
-            <p className="lede">
-              会员登录后，可查看今日洞察、历史观点和公告通知。后续再逐步接入 AI 市场助理与股票分析模块。
-            </p>
-            <div className="inline-actions">
-              <a className="primary-link" href="/today">今日洞察</a>
-              <a className="secondary-link" href="/history">历史洞察</a>
-              <a className="secondary-link" href="/announcements">公告通知</a>
-              <a className="secondary-link" href="/logout">退出登录</a>
-            </div>
-          </div>
-          <div className="account-card">
-            <div>
-              <span className="label">会员账号</span>
-              <strong>{profile?.accountNumber ?? '已登录'}</strong>
-            </div>
-            <div>
-              <span className="label">使用期限</span>
-              <strong>{expireText}</strong>
-            </div>
-            <div>
-              <span className="label">剩余时间</span>
-              <strong>{remainingText}</strong>
-            </div>
-            <div>
-              <span className="label">状态</span>
-              <strong>{profile?.status ?? 'active'}</strong>
-            </div>
-          </div>
-        </div>
-      </section>
+  const benefitItems = [
+    '全部AI洞察功能',
+    '专属AI智能服务',
+    '高级风险预警',
+    '专属客服支持'
+  ];
 
-      <section className="card-grid">
-        {highlights.map((item) => (
-          <article key={item.title} className="feature-card">
-            {canUse(item.permission) ? (
-              <a href={item.href}>
-                <h2>{item.title}</h2>
+  return (
+    <main className="member-dashboard">
+      <aside className="member-sidebar">
+        <a className="member-logo" href="/">
+          <img src="/homilychart-malaysia-logo-cutout.png" alt="HomilyChart Malaysia" />
+          <span>Homily Malaysia</span>
+        </a>
+        <nav className="member-nav" aria-label="会员导航">
+          {sidebarItems.map((item, index) => {
+            const active = item.href === '/';
+            const enabled = item.href === '/logout' || canUse(item.permission);
+            return (
+              <a
+                key={item.href}
+                className={active ? 'active' : enabled ? '' : 'locked'}
+                href={enabled ? item.href : '#'}
+                aria-disabled={!enabled}
+              >
+                <span className="nav-icon">{String(index + 1).padStart(2, '0')}</span>
+                <span>{item.label}</span>
+                {item.badge ? <strong>{item.badge}</strong> : null}
               </a>
-            ) : (
-              <h2>{item.title}</h2>
-            )}
-            <p>{item.body}</p>
-            <span className={canUse(item.permission) ? 'mini-badge active' : 'mini-badge'}>
-              {canUse(item.permission) ? '已开通' : '未开通'}
-            </span>
+            );
+          })}
+        </nav>
+
+        <section className="upgrade-card">
+          <span className="crown-mark">VIP</span>
+          <h2>升级会员</h2>
+          <p>解锁全部AI洞察功能和专项权益。</p>
+          <a href="/soon">立即升级</a>
+        </section>
+      </aside>
+
+      <section className="member-main">
+        <header className="member-topbar">
+          <div>
+            <p className="eyebrow">Market Intelligence Center</p>
+            <h1>欢迎来到市场洞察中心</h1>
+            <p>AI 驱动的市场洞察与分析，帮您把握每一个投资机会。</p>
+          </div>
+          <div className="member-user-chip">
+            <span>{profile?.fullName ?? 'Member'}</span>
+            <strong>{profile?.accountNumber ?? '已登录'}</strong>
+          </div>
+        </header>
+
+        <div className="dashboard-grid">
+          <section className="market-hero-card">
+            <div className="market-hero-copy">
+              <span className="hot-label">今日核心洞察</span>
+              <h2>算力已成新金本位，科技巨头开启新一轮军备竞赛</h2>
+              <p>
+                随着 AI 大模型持续迭代，算力基础设施成为科技竞争的核心壁垒。英伟达最新财报超预期，揭示 AI 算力需求仍处于爆发前夜。
+              </p>
+              <a href="/today">查看完整洞察</a>
+            </div>
+            <img src="/member-dashboard-visual.png" alt="AI market intelligence visual" />
+          </section>
+
+          <aside className="vip-panel">
+            <div className="vip-title-row">
+              <span>VIP 会员</span>
+              <strong>尊享版</strong>
+            </div>
+            <dl>
+              <div>
+                <dt>会员账号</dt>
+                <dd>{profile?.accountNumber ?? '已登录'}</dd>
+              </div>
+              <div>
+                <dt>到期时间</dt>
+                <dd>{expireText}</dd>
+              </div>
+              <div>
+                <dt>剩余时间</dt>
+                <dd>{remainingText}</dd>
+              </div>
+              <div>
+                <dt>会员状态</dt>
+                <dd className={profile?.status === 'active' ? 'status-active' : ''}>{profile?.status ?? 'active'}</dd>
+              </div>
+            </dl>
+            <a className="renew-button" href="/soon">续费会员</a>
+            <div className="benefit-list">
+              {benefitItems.map((item) => (
+                <span key={item}>{item}</span>
+              ))}
+            </div>
+          </aside>
+        </div>
+
+        <section className="dashboard-cards">
+          <article className="mini-service-card notice-card">
+            <div className="service-heading">
+              <span>公告通知</span>
+              <strong>3</strong>
+            </div>
+            {announcements.map(([title, time]) => (
+              <p key={title}><b>{title}</b><small>{time}</small></p>
+            ))}
+            <a href="/announcements">查看全部</a>
           </article>
-        ))}
+
+          <article className="mini-service-card">
+            <div className="service-heading">
+              <span>历史洞察</span>
+            </div>
+            {historyItems.map(([title, date]) => (
+              <p key={title}><b>{title}</b><small>{date}</small></p>
+            ))}
+            <a href="/history">查看全部</a>
+          </article>
+
+          {highlights.slice(3).map((item) => {
+            const enabled = canUse(item.permission);
+            return (
+              <article key={item.title} className={enabled ? 'mini-service-card enabled-card' : 'mini-service-card locked-card'}>
+                <div className="service-heading">
+                  <span>{item.title}</span>
+                  <strong>{enabled ? 'ON' : 'LOCK'}</strong>
+                </div>
+                <p>{item.body}</p>
+                <a href={enabled ? item.href : '/soon'}>{enabled ? '进入服务' : '了解解锁'}</a>
+              </article>
+            );
+          })}
+        </section>
       </section>
     </main>
   );
