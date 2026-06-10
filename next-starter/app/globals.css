@@ -1398,7 +1398,13 @@ h1 {
   font-size: 22px;
 }
 
-.personal-report-section p {
+.personal-report-paragraphs {
+  display: grid;
+  gap: 12px;
+}
+
+.personal-report-section p,
+.personal-report-paragraphs p {
   margin: 0;
   color: #dce7ff;
   font-size: 16px;

@@ -1,6 +1,6 @@
 export type PersonalReportSection = {
   title: string;
-  body: string;
+  paragraphs: string[];
 };
 
 export type PersonalReport = {
@@ -20,6 +20,34 @@ function normalizeBody(body: string) {
     .replace(/(Checklist[)）]?[:：])/gi, '\n$1')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
+}
+
+function splitInnerParagraphs(text: string) {
+  return text
+    .replace(/\s+(?=(模块[一二三四五六七八九十]+[:：]))/g, '\n')
+    .replace(/(?<=[。！？；;])\s+(?=([一-龥]{2,14}[）)]?[:：]))/g, '\n')
+    .replace(/(?<=[。！？；;])\s+(?=(其核心|新旧经济|逆向思考|反垄断|财务与自由现金流|管理层质地|估值与安全边际|盈利叙事|仓位管理|交易与参与周期|未来|BMA\s*结论|Checklist)[^。！？；;]{0,18}[:：])/gi, '\n')
+    .split(/\n+/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .flatMap((paragraph) => {
+      if (paragraph.length <= 260) {
+        return [paragraph];
+      }
+
+      return paragraph
+        .split(/(?<=[。！？；;])\s+/)
+        .reduce<string[]>((groups, sentence) => {
+          const last = groups[groups.length - 1] ?? '';
+          if (!last || last.length > 260) {
+            groups.push(sentence.trim());
+          } else {
+            groups[groups.length - 1] = `${last}${sentence.trim()}`;
+          }
+          return groups;
+        }, [])
+        .filter(Boolean);
+    });
 }
 
 function splitByParagraphs(normalized: string) {
@@ -80,9 +108,9 @@ export function buildPersonalReport(body: string): PersonalReport {
   const blocks = mergeIntoFour(rawBlocks.length > 0 ? rawBlocks : [normalized]);
   const sections = blocks.map((block, index) => ({
     title: getBlockTitle(block, index),
-    body: getBlockText(block)
-  })).filter((section) => section.body);
-  const firstText = sections[0]?.body || normalized || '专属内容已生成，请查看完整报告。';
+    paragraphs: splitInnerParagraphs(getBlockText(block))
+  })).filter((section) => section.paragraphs.length > 0);
+  const firstText = sections[0]?.paragraphs.join(' ') || normalized || '专属内容已生成，请查看完整报告。';
   const summary = firstText.length > 120 ? `${firstText.slice(0, 120)}...` : firstText;
 
   return {

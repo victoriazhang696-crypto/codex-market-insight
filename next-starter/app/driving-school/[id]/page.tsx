@@ -60,7 +60,11 @@ export default async function DrivingSchoolDetailPage({ params }: Params) {
               <section key={`${content.id}-${index}`} className="personal-report-section">
                 <span>{String(index + 1).padStart(2, '0')}</span>
                 <h3>{section.title}</h3>
-                <p>{section.body}</p>
+                <div className="personal-report-paragraphs">
+                  {section.paragraphs.map((paragraph, paragraphIndex) => (
+                    <p key={`${content.id}-${index}-${paragraphIndex}`}>{paragraph}</p>
+                  ))}
+                </div>
               </section>
             ))}
           </div>
