@@ -21,7 +21,7 @@ export default async function UsReviewPage() {
       activePath="/us-review"
       eyebrow="US Review"
       title="US 市场复盘"
-      description="这里显示后台发布到“US复盘简报”的会员内容。"
+      description="这里显示“US复盘简报”的会员专属内容。"
     >
       <section className="member-page-panel">
         <div className="member-list">
@@ -36,7 +36,7 @@ export default async function UsReviewPage() {
           )) : (
             <article className="member-list-row">
               <strong>暂无 US 复盘简报</strong>
-              <span>后台发布到该栏目后，这里会自动显示。</span>
+              <span>US 复盘简报生成后，这里会自动显示。</span>
             </article>
           )}
         </div>

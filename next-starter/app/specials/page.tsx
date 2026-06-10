@@ -21,7 +21,7 @@ export default async function SpecialsPage() {
       activePath="/specials"
       eyebrow="Special Program"
       title="专项陪跑内容"
-      description="这里显示后台发布到“陪跑专项”的会员内容。"
+      description="这里显示“陪跑专项”的会员专属内容。"
     >
       <section className="member-page-panel">
         <div className="member-list">
@@ -36,7 +36,7 @@ export default async function SpecialsPage() {
           )) : (
             <article className="member-list-row">
               <strong>暂无陪跑专项内容</strong>
-              <span>后台发布到该栏目后，这里会自动显示。</span>
+              <span>专项内容生成后，这里会自动显示。</span>
             </article>
           )}
         </div>

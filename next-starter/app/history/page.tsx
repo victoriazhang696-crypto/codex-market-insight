@@ -21,7 +21,7 @@ export default async function HistoryPage() {
       activePath="/history"
       eyebrow="History Archive"
       title="历史洞察档案"
-      description="过往市场洞察会自动归档，后台补发昨天或更早的内容后也会显示在这里。"
+      description="过往市场洞察会自动归档，历史观点生成后会显示在这里。"
     >
       <section className="member-page-panel">
         <div className="member-list">
@@ -36,7 +36,7 @@ export default async function HistoryPage() {
           )) : (
             <article className="member-list-row">
               <strong>暂无历史洞察</strong>
-              <span>管理员发布文章后，这里会自动显示。</span>
+              <span>历史洞察生成后，这里会自动显示。</span>
             </article>
           )}
         </div>

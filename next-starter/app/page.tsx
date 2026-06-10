@@ -192,8 +192,8 @@ export default async function MemberHomePage() {
         <section className="insight-strip">
           <div>
             <span>今日核心洞察</span>
-            <strong>{latestToday?.title ?? '今日洞察待更新'}</strong>
-            <p>{latestToday?.summary || '后台发布今日市场洞察后，这里会自动显示最新内容。'}</p>
+            <strong>{latestToday?.title ?? '今日 AI 洞察准备中'}</strong>
+            <p>{latestToday?.summary || 'AI 正在等待今日市场信号，洞察生成后会自动呈现。'}</p>
           </div>
           <a href="/today">查看完整洞察</a>
         </section>

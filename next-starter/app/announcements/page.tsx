@@ -37,7 +37,7 @@ export default async function AnnouncementsPage() {
             <div className="service-heading">
               <span>暂无公告</span>
             </div>
-            <p>后台发布公告后，这里会自动显示给会员。</p>
+            <p>暂无会员通知，新的 AI 服务提醒会自动显示在这里。</p>
           </article>
         )}
       </section>

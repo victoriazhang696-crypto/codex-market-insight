@@ -20,9 +20,9 @@ export default async function TodayPage() {
 
   if (!article) {
     return (
-      <MemberFrame activePath="/today" eyebrow="Today Insight" title="暂无已发布洞察">
+      <MemberFrame activePath="/today" eyebrow="Today Insight" title="今日 AI 洞察准备中">
         <section className="member-page-panel empty-state">
-          <p className="lede">管理员发布文章后，会员会在这里看到最新内容。</p>
+          <p className="lede">AI 正在等待今日市场信号，洞察生成后会自动呈现。</p>
         </section>
       </MemberFrame>
     );
@@ -52,7 +52,7 @@ export default async function TodayPage() {
             {articleBlocks.map((block, index) => (
               <section key={`${block.heading ?? 'paragraph'}-${index}`} className={block.heading ? 'article-section' : 'article-lead-block'}>
                 {block.heading ? <h2>{block.heading}</h2> : null}
-              <p>{block.body}</p>
+                <p>{block.body}</p>
               </section>
             ))}
           </div>
