@@ -1411,6 +1411,59 @@ h1 {
   line-height: 1.85;
 }
 
+.rich-content-image {
+  display: block;
+  width: 100%;
+  max-height: 420px;
+  margin: 14px 0;
+  border: 1px solid rgba(69, 242, 255, 0.22);
+  border-radius: 16px;
+  object-fit: contain;
+  background: rgba(3, 12, 28, 0.72);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.28);
+}
+
+.personal-attachment-image {
+  display: block;
+  width: min(100%, 760px);
+  max-height: 520px;
+  margin-top: 8px;
+  border: 1px solid rgba(69, 242, 255, 0.22);
+  border-radius: 18px;
+  object-fit: contain;
+  background: rgba(3, 12, 28, 0.72);
+}
+
+.personal-conclusion-card {
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+  border: 1px solid rgba(255, 194, 49, 0.46);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 194, 49, 0.16), transparent 34%),
+    linear-gradient(135deg, rgba(33, 28, 8, 0.76), rgba(8, 25, 52, 0.9));
+}
+
+.personal-conclusion-card span {
+  width: fit-content;
+  padding: 5px 12px;
+  border: 1px solid rgba(255, 194, 49, 0.4);
+  border-radius: 999px;
+  color: #ffc231;
+  font-size: 13px;
+  font-weight: 1000;
+  letter-spacing: 0.12em;
+}
+
+.personal-conclusion-card p {
+  margin: 0;
+  color: #fff4d1;
+  font-size: 18px;
+  font-weight: 850;
+  line-height: 1.82;
+}
+
 .personal-report-card > a {
   width: fit-content;
   padding: 12px 16px;

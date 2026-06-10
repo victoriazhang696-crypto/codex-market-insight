@@ -1,6 +1,7 @@
 import { splitArticleBlocks } from '@/lib/article-format';
 import { getArticleBySlug, getArticleCategoryLabel } from '@/lib/content';
 import { canCurrentMemberAccess } from '@/lib/member-profile';
+import { renderRichParagraph } from '@/lib/rich-content';
 import MemberFrame from '../../member-frame';
 
 type Params = {
@@ -50,7 +51,7 @@ export default async function TodayArticlePage({ params }: Params) {
             {articleBlocks.map((block, index) => (
               <section key={`${block.heading ?? 'paragraph'}-${index}`} className={block.heading ? 'article-section' : 'article-lead-block'}>
                 {block.heading ? <h2>{block.heading}</h2> : null}
-                <p>{block.body}</p>
+                <p>{renderRichParagraph(block.body)}</p>
               </section>
             ))}
           </div>

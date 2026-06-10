@@ -1,5 +1,6 @@
 import { getCurrentMemberPersonalContentById } from '@/lib/personal-content';
 import { buildPersonalReport } from '@/lib/personal-report';
+import { renderRichParagraph } from '@/lib/rich-content';
 import MemberFrame from '../../member-frame';
 
 type Params = {
@@ -62,13 +63,27 @@ export default async function DrivingSchoolDetailPage({ params }: Params) {
                 <h3>{section.title}</h3>
                 <div className="personal-report-paragraphs">
                   {section.paragraphs.map((paragraph, paragraphIndex) => (
-                    <p key={`${content.id}-${index}-${paragraphIndex}`}>{paragraph}</p>
+                    <p key={`${content.id}-${index}-${paragraphIndex}`}>{renderRichParagraph(paragraph)}</p>
                   ))}
                 </div>
               </section>
             ))}
           </div>
-          {content.attachmentUrl ? <a href={content.attachmentUrl} target="_blank" rel="noreferrer">打开附件 / 链接</a> : null}
+          {report.conclusion.length > 0 ? (
+            <section className="personal-conclusion-card">
+              <span>结论</span>
+              {report.conclusion.map((paragraph, index) => (
+                <p key={`${content.id}-conclusion-${index}`}>{renderRichParagraph(paragraph)}</p>
+              ))}
+            </section>
+          ) : null}
+          {content.attachmentUrl ? (
+            content.attachmentUrl.match(/\.(png|jpe?g|webp|gif)(\?|$)/i) ? (
+              <img className="personal-attachment-image" src={content.attachmentUrl} alt="附件图片" />
+            ) : (
+              <a href={content.attachmentUrl} target="_blank" rel="noreferrer">打开附件 / PDF</a>
+            )
+          ) : null}
         </article>
       </section>
     </MemberFrame>

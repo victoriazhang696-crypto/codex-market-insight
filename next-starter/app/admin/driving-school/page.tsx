@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from 'react';
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
 
 type DrivingSchoolMember = {
   id: string;
@@ -26,11 +26,32 @@ type DrivingSchoolContent = {
   } | null;
 };
 
+type ContentForm = {
+  targetUserId: string;
+  contentType: string;
+  title: string;
+  body: string;
+  attachmentUrl: string;
+  status: 'draft' | 'published' | 'hidden';
+};
+
+const emptyForm: ContentForm = {
+  targetUserId: '',
+  contentType: '定制内容',
+  title: '',
+  body: '',
+  attachmentUrl: '',
+  status: 'published'
+};
+
 export default function AdminDrivingSchoolPage() {
   const [members, setMembers] = useState<DrivingSchoolMember[]>([]);
   const [contents, setContents] = useState<DrivingSchoolContent[]>([]);
+  const [formValue, setFormValue] = useState<ContentForm>(emptyForm);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   async function loadData() {
     try {
@@ -59,31 +80,25 @@ export default function AdminDrivingSchoolPage() {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = event.currentTarget;
-    const formData = new FormData(form);
     setLoading(true);
-    setMessage('正在保存专属内容...');
+    setMessage(editingId ? '正在更新专属内容...' : '正在保存专属内容...');
 
     const payload = {
       serviceKey: 'driving_school',
-      targetUserId: String(formData.get('targetUserId') ?? ''),
-      title: String(formData.get('title') ?? ''),
-      body: String(formData.get('body') ?? ''),
-      contentType: String(formData.get('contentType') ?? ''),
-      attachmentUrl: String(formData.get('attachmentUrl') ?? ''),
-      status: String(formData.get('status') ?? 'published')
+      ...formValue
     };
 
     try {
-      const response = await fetch('/api/admin/personal-contents', {
-        method: 'POST',
+      const response = await fetch(editingId ? `/api/admin/personal-contents/${editingId}` : '/api/admin/personal-contents', {
+        method: editingId ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
       const result = (await response.json()) as { ok: boolean; message?: string };
       if (result.ok) {
-        setMessage('专属内容已保存。');
-        form.reset();
+        setMessage(editingId ? '专属内容已更新。' : '专属内容已保存。');
+        setFormValue(emptyForm);
+        setEditingId(null);
         await loadData();
       } else {
         setMessage(result.message ?? '保存失败');
@@ -92,6 +107,73 @@ export default function AdminDrivingSchoolPage() {
       setMessage('网络请求失败');
     } finally {
       setLoading(false);
+    }
+  }
+
+  function updateForm<K extends keyof ContentForm>(field: K, value: ContentForm[K]) {
+    setFormValue((current) => ({ ...current, [field]: value }));
+  }
+
+  function editContent(item: DrivingSchoolContent) {
+    setEditingId(item.id);
+    setFormValue({
+      targetUserId: item.target_user_id,
+      contentType: item.content_type,
+      title: item.title,
+      body: item.body,
+      attachmentUrl: item.attachment_url ?? '',
+      status: item.status === 'draft' || item.status === 'hidden' ? item.status : 'published'
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function uploadFile(file: File, folder: string) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', folder);
+    const response = await fetch('/api/admin/uploads', {
+      method: 'POST',
+      body: formData
+    });
+    const result = (await response.json()) as { ok: boolean; url?: string; message?: string; fileType?: string };
+    if (!result.ok || !result.url) {
+      throw new Error(result.message ?? '上传失败');
+    }
+    return result;
+  }
+
+  async function onAttachmentUpload(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setMessage('正在上传附件...');
+    try {
+      const result = await uploadFile(file, 'driving-school-attachments');
+      updateForm('attachmentUrl', result.url ?? '');
+      setMessage('附件已上传。');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : '上传失败');
+    } finally {
+      event.target.value = '';
+    }
+  }
+
+  async function onContentImageUpload(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setMessage('正在上传正文图片...');
+    try {
+      const result = await uploadFile(file, 'driving-school-images');
+      const markdown = `\n\n![内容图片](${result.url})\n\n`;
+      const textarea = bodyRef.current;
+      const start = textarea?.selectionStart ?? formValue.body.length;
+      const end = textarea?.selectionEnd ?? formValue.body.length;
+      const nextBody = `${formValue.body.slice(0, start)}${markdown}${formValue.body.slice(end)}`;
+      updateForm('body', nextBody);
+      setMessage('图片已插入正文。');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : '上传失败');
+    } finally {
+      event.target.value = '';
     }
   }
 
@@ -126,11 +208,11 @@ export default function AdminDrivingSchoolPage() {
       </section>
 
       <section className="hero-card" style={{ marginTop: 16 }}>
-        <h2>发布定向内容</h2>
+        <h2>{editingId ? '编辑定向内容' : '发布定向内容'}</h2>
         <form className="form-stack" onSubmit={onSubmit}>
           <label>
             <span>接收客户</span>
-            <select name="targetUserId" required>
+            <select name="targetUserId" value={formValue.targetUserId} onChange={(event) => updateForm('targetUserId', event.target.value)} required>
               <option value="">选择已开通环球驾校权限的客户</option>
               {members.map((member) => (
                 <option key={member.id} value={member.id}>
@@ -141,7 +223,7 @@ export default function AdminDrivingSchoolPage() {
           </label>
           <label>
             <span>内容类型</span>
-            <select name="contentType" defaultValue="定制内容">
+            <select name="contentType" value={formValue.contentType} onChange={(event) => updateForm('contentType', event.target.value)}>
               <option value="定制内容">定制内容</option>
               <option value="课程提醒">课程提醒</option>
               <option value="学习计划">学习计划</option>
@@ -151,27 +233,37 @@ export default function AdminDrivingSchoolPage() {
           </label>
           <label>
             <span>标题</span>
-            <input name="title" placeholder="例如：Simin 第1周环球驾校专属计划" required />
+            <input name="title" value={formValue.title} onChange={(event) => updateForm('title', event.target.value)} placeholder="例如：Simin 第1周环球驾校专属计划" required />
           </label>
           <label>
             <span>内容</span>
-            <textarea name="body" rows={8} placeholder="填写只给该客户看的专属内容" required />
+            <textarea ref={bodyRef} name="body" rows={8} value={formValue.body} onChange={(event) => updateForm('body', event.target.value)} placeholder="填写只给该客户看的专属内容；可用“结论：”开头写最后结论" required />
+            <span className="subtle">插图会插入到光标位置，前端会自动显示为图片。</span>
+            <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => void onContentImageUpload(event)} />
           </label>
           <label>
-            <span>附件或外部链接</span>
-            <input name="attachmentUrl" placeholder="可选：https://..." />
+            <span>附件 PDF / 图片</span>
+            <input name="attachmentUrl" value={formValue.attachmentUrl} onChange={(event) => updateForm('attachmentUrl', event.target.value)} placeholder="上传后自动生成链接，也可粘贴外部链接" />
+            <input type="file" accept="application/pdf,image/png,image/jpeg,image/webp,image/gif" onChange={(event) => void onAttachmentUpload(event)} />
           </label>
           <label>
             <span>状态</span>
-            <select name="status" defaultValue="published">
+            <select name="status" value={formValue.status} onChange={(event) => updateForm('status', event.target.value as ContentForm['status'])}>
               <option value="published">发布给客户可见</option>
               <option value="hidden">先隐藏</option>
               <option value="draft">草稿</option>
             </select>
           </label>
-          <button className="primary-button" type="submit" disabled={loading}>
-            {loading ? '保存中...' : '保存专属内容'}
-          </button>
+          <div className="inline-actions">
+            <button className="primary-button" type="submit" disabled={loading}>
+              {loading ? '保存中...' : editingId ? '保存修改' : '保存专属内容'}
+            </button>
+            {editingId ? (
+              <button className="secondary-button" type="button" onClick={() => { setEditingId(null); setFormValue(emptyForm); }}>
+                取消编辑
+              </button>
+            ) : null}
+          </div>
         </form>
         {message ? <p className="subtle" style={{ marginTop: 12 }}>{message}</p> : null}
       </section>
@@ -186,6 +278,7 @@ export default function AdminDrivingSchoolPage() {
                 {item.profiles?.full_name ?? '会员'} · {item.profiles?.account_number ?? item.target_user_id} · {item.content_type} · {item.status}
               </span>
               <span className="inline-actions">
+                <button className="secondary-button" type="button" onClick={() => editContent(item)}>编辑</button>
                 <button className="secondary-button" type="button" onClick={() => void updateStatus(item.id, 'published')}>显示</button>
                 <button className="secondary-button" type="button" onClick={() => void updateStatus(item.id, 'hidden')}>隐藏</button>
               </span>

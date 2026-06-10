@@ -6,6 +6,7 @@ export type PersonalReportSection = {
 export type PersonalReport = {
   summary: string;
   sections: PersonalReportSection[];
+  conclusion: string[];
 };
 
 const fallbackTitles = ['定制判断', '关键逻辑', '风险与机会', '执行提醒'];
@@ -48,6 +49,26 @@ function splitInnerParagraphs(text: string) {
         }, [])
         .filter(Boolean);
     });
+}
+
+function splitConclusion(normalized: string) {
+  const match = normalized.match(/(?:^|\n|\s)(?:结论|BMA\s*结论|最终结论|核心结论)[：:]\s*(.+)$/is);
+
+  if (!match) {
+    return {
+      main: normalized,
+      conclusion: []
+    };
+  }
+
+  const conclusionStart = match.index ?? normalized.length;
+  const main = normalized.slice(0, conclusionStart).trim();
+  const conclusion = splitInnerParagraphs(match[1].trim());
+
+  return {
+    main: main || normalized,
+    conclusion
+  };
 }
 
 function splitByParagraphs(normalized: string) {
@@ -103,8 +124,9 @@ function mergeIntoFour(blocks: string[]) {
 
 export function buildPersonalReport(body: string): PersonalReport {
   const normalized = normalizeBody(body);
-  const paragraphBlocks = splitByParagraphs(normalized);
-  const rawBlocks = paragraphBlocks.length > 1 ? paragraphBlocks : splitBySentences(normalized);
+  const { main, conclusion } = splitConclusion(normalized);
+  const paragraphBlocks = splitByParagraphs(main);
+  const rawBlocks = paragraphBlocks.length > 1 ? paragraphBlocks : splitBySentences(main);
   const blocks = mergeIntoFour(rawBlocks.length > 0 ? rawBlocks : [normalized]);
   const sections = blocks.map((block, index) => ({
     title: getBlockTitle(block, index),
@@ -115,6 +137,7 @@ export function buildPersonalReport(body: string): PersonalReport {
 
   return {
     summary,
-    sections
+    sections,
+    conclusion
   };
 }

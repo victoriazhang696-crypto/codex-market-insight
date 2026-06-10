@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useRef, useState } from 'react';
 
 import { articleCategories, type ArticleCategory } from '@/lib/article-categories';
 import type { ContentArticle } from '@/lib/content';
@@ -14,6 +14,7 @@ type Props = {
 export function ArticleEditorForm({ article }: Props) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const contentRef = useRef<HTMLTextAreaElement>(null);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -54,6 +55,44 @@ export function ArticleEditorForm({ article }: Props) {
     }
   }
 
+  async function uploadArticleImage(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setMessage('正在上传正文图片...');
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', 'article-images');
+
+    try {
+      const response = await fetch('/api/admin/uploads', {
+        method: 'POST',
+        body: formData
+      });
+      const result = (await response.json()) as { ok: boolean; url?: string; message?: string };
+      if (!result.ok || !result.url) {
+        setMessage(result.message ?? '图片上传失败');
+        return;
+      }
+
+      const textarea = contentRef.current;
+      if (textarea) {
+        const markdown = `\n\n![内容图片](${result.url})\n\n`;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        textarea.value = `${textarea.value.slice(0, start)}${markdown}${textarea.value.slice(end)}`;
+        textarea.focus();
+        textarea.selectionStart = start + markdown.length;
+        textarea.selectionEnd = start + markdown.length;
+      }
+      setMessage('图片已插入正文。');
+    } catch (error) {
+      setMessage(error instanceof Error ? `上传失败：${error.message}` : '图片上传失败');
+    } finally {
+      event.target.value = '';
+    }
+  }
+
   return (
     <form className="form-stack" onSubmit={onSubmit}>
       <label>
@@ -74,7 +113,9 @@ export function ArticleEditorForm({ article }: Props) {
       </label>
       <label>
         <span>正文</span>
-        <textarea name="content" rows={8} defaultValue={article.content} />
+        <textarea ref={contentRef} name="content" rows={8} defaultValue={article.content} />
+        <span className="subtle">插图会插入到光标位置，前端会自动显示为图片。</span>
+        <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => void uploadArticleImage(event)} />
       </label>
       <label>
         <span>风险提示</span>
