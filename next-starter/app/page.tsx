@@ -1,5 +1,10 @@
 import { getAnnouncements, getPublishedArticles, isPublishedTodayInMalaysia } from '@/lib/content';
-import { getFeatureExpireDate, hasActiveFeaturePermission, type FeaturePermission } from '@/lib/feature-permissions';
+import {
+  getFeatureExpireDate,
+  getRemainingDaysFromMalaysiaToday,
+  hasActiveFeaturePermission,
+  type FeaturePermission
+} from '@/lib/feature-permissions';
 import { getCurrentMemberProfile } from '@/lib/member-profile';
 import { getCurrentMemberPersonalContents } from '@/lib/personal-content';
 import MemberNav, { type MemberNavItem } from './member-nav';
@@ -94,18 +99,6 @@ function titleMatchesToday(title: string) {
   return Number(dateMatch[1]) === Number(today.month) && Number(dateMatch[2]) === Number(today.day);
 }
 
-function getRemainingDays(expireDate: string | null) {
-  if (!expireDate) {
-    return null;
-  }
-
-  const today = new Date();
-  const end = new Date(`${expireDate}T00:00:00`);
-  today.setHours(0, 0, 0, 0);
-
-  return Math.ceil((end.getTime() - today.getTime()) / 86_400_000);
-}
-
 function getFeatureExpirySummary(expireDate: string | null) {
   if (!expireDate) {
     return {
@@ -114,10 +107,10 @@ function getFeatureExpirySummary(expireDate: string | null) {
     };
   }
 
-  const days = getRemainingDays(expireDate);
+  const days = getRemainingDaysFromMalaysiaToday(expireDate);
   return {
     dateText: `有效至 ${expireDate}`,
-    daysText: days === null ? '未设置' : days >= 0 ? `剩余 ${days} 天` : '已到期'
+    daysText: days === null ? '未设置' : days > 0 ? `剩余 ${days} 天` : days === 0 ? '今日到期' : '已到期'
   };
 }
 
@@ -146,9 +139,11 @@ export default async function MemberHomePage() {
   const remainingText =
     profile?.remainingDays === null || profile?.remainingDays === undefined
       ? '未设置'
-      : profile.remainingDays >= 0
+      : profile.remainingDays > 0
         ? `${profile.remainingDays} 天`
-        : '已到期';
+        : profile.remainingDays === 0
+          ? '今日到期'
+          : '已到期';
 
   const navItems: MemberNavItem[] = sidebarItems.map((item) => {
     const enabled = item.href === '/logout' || canUse(item.permission);

@@ -1364,7 +1364,7 @@ h1 {
 
 .personal-report-summary p {
   margin: 0;
-  color: #e8f0ff;
+  color: #f5f8ff;
   font-size: 18px;
   font-weight: 800;
   line-height: 1.75;
@@ -1406,9 +1406,32 @@ h1 {
 .personal-report-section p,
 .personal-report-paragraphs p {
   margin: 0;
-  color: #dce7ff;
+  color: #f5f8ff;
   font-size: 16px;
+  font-weight: 700;
   line-height: 1.85;
+}
+
+.personal-report-section p span,
+.personal-report-paragraphs p span {
+  color: inherit;
+}
+
+.rich-content-image-link,
+.personal-attachment-image-link {
+  position: relative;
+  display: block;
+  max-width: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.rich-content-image-link {
+  width: 100%;
+}
+
+.personal-attachment-image-link {
+  width: fit-content;
 }
 
 .rich-content-image {
@@ -1421,6 +1444,34 @@ h1 {
   object-fit: contain;
   background: rgba(3, 12, 28, 0.72);
   box-shadow: 0 20px 48px rgba(0, 0, 0, 0.28);
+}
+
+.rich-content-image-link small,
+.personal-attachment-image-link small {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 6px 10px;
+  border: 1px solid rgba(69, 242, 255, 0.26);
+  border-radius: 999px;
+  background: rgba(3, 12, 28, 0.78);
+  color: #f5f8ff;
+  font-size: 12px;
+  font-weight: 900;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.rich-content-image-link:hover .rich-content-image,
+.personal-attachment-image-link:hover .personal-attachment-image {
+  border-color: rgba(69, 242, 255, 0.48);
+}
+
+.rich-content-image-link:hover small,
+.personal-attachment-image-link:hover small {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .personal-attachment-image {
@@ -1458,10 +1509,14 @@ h1 {
 
 .personal-conclusion-card p {
   margin: 0;
-  color: #fff4d1;
+  color: #fff8e5;
   font-size: 18px;
   font-weight: 850;
   line-height: 1.82;
+}
+
+.personal-conclusion-card p span {
+  color: inherit;
 }
 
 .personal-report-card > a {

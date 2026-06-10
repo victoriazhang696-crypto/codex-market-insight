@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import {
+  getRemainingDaysFromMalaysiaToday,
   hasActiveFeaturePermission,
   isDateActive,
   normalizeFeatureExpiries,
@@ -18,18 +19,6 @@ export type MemberProfile = {
   featureExpiries: FeatureExpiries;
   remainingDays: number | null;
 };
-
-function getRemainingDays(expireDate: string | null) {
-  if (!expireDate) {
-    return null;
-  }
-
-  const today = new Date();
-  const end = new Date(`${expireDate}T00:00:00`);
-  today.setHours(0, 0, 0, 0);
-
-  return Math.ceil((end.getTime() - today.getTime()) / 86_400_000);
-}
 
 export async function getCurrentMemberProfile(): Promise<MemberProfile | null> {
   const supabase = await createSupabaseServerClient();
@@ -64,7 +53,7 @@ export async function getCurrentMemberProfile(): Promise<MemberProfile | null> {
       status: fallbackResult.data.status ?? 'active',
       featurePermissions: normalizeFeaturePermissions(null),
       featureExpiries: {},
-      remainingDays: getRemainingDays(fallbackResult.data.expire_date ?? null)
+      remainingDays: getRemainingDaysFromMalaysiaToday(fallbackResult.data.expire_date ?? null)
     };
   }
 
@@ -80,7 +69,7 @@ export async function getCurrentMemberProfile(): Promise<MemberProfile | null> {
     status: data.status ?? 'active',
     featurePermissions: normalizeFeaturePermissions(data.feature_permissions),
     featureExpiries: normalizeFeatureExpiries(data.feature_expiries),
-    remainingDays: getRemainingDays(data.expire_date ?? null)
+    remainingDays: getRemainingDaysFromMalaysiaToday(data.expire_date ?? null)
   };
 }
 

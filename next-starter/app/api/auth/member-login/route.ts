@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { accountNumberToEmail, isEightDigitAccountNumber, normalizePhonePassword } from '@/lib/account';
+import { isDateActive } from '@/lib/feature-permissions';
 import { getRequestCookieMap, jsonWithRouteCookies } from '@/lib/supabase/route-cookies';
 import { createSupabaseRouteClient } from '@/lib/supabase/route-client';
 
@@ -48,6 +49,22 @@ export async function POST(request: Request) {
 
   if (error) {
     return jsonWithRouteCookies({ ok: false, message: error.message }, cookieResponse, { status: 401 });
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('status, expire_date, role')
+    .eq('id', data.user.id)
+    .single();
+
+  if (!profile || profile.role !== 'member' || profile.status !== 'active') {
+    await supabase.auth.signOut();
+    return jsonWithRouteCookies({ ok: false, message: '账号状态不可用，请联系顾问处理。' }, cookieResponse, { status: 403 });
+  }
+
+  if (!isDateActive(profile.expire_date)) {
+    await supabase.auth.signOut();
+    return jsonWithRouteCookies({ ok: false, message: '您的阅读权限已到期，请联系顾问续期开通。' }, cookieResponse, { status: 403 });
   }
 
   return jsonWithRouteCookies({

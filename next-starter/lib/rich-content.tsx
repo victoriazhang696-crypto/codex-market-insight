@@ -15,13 +15,22 @@ export function renderRichParagraph(text: string): ReactNode[] {
     }
 
     nodes.push(
-      <img
+      <a
         key={`image-${index}`}
-        className="rich-content-image"
-        src={match[2]}
-        alt={match[1] || '内容图片'}
-        loading="lazy"
-      />
+        className="rich-content-image-link"
+        href={match[2]}
+        target="_blank"
+        rel="noreferrer"
+        aria-label="打开内容图片大图"
+      >
+        <img
+          className="rich-content-image"
+          src={match[2]}
+          alt={match[1] || '内容图片'}
+          loading="lazy"
+        />
+        <small>点击查看大图</small>
+      </a>
     );
     lastIndex = index + match[0].length;
   }

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
+import { isDateActive } from '@/lib/feature-permissions';
 import { createSupabaseMiddlewareClient } from '@/lib/supabase/middleware';
 
 const publicPaths = ['/login', '/admin-login'];
@@ -87,6 +88,13 @@ export async function middleware(request: NextRequest) {
       const url = request.nextUrl.clone();
       url.pathname = '/login';
       url.searchParams.set('reason', 'inactive');
+      return NextResponse.redirect(url);
+    }
+
+    if (!isDateActive(session.expireDate)) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      url.searchParams.set('reason', 'expired');
       return NextResponse.redirect(url);
     }
 

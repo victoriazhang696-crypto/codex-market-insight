@@ -41,14 +41,40 @@ export function normalizeFeatureExpiries(value: unknown): FeatureExpiries {
   return Object.fromEntries(entries);
 }
 
+function dateToUtcDay(value: string) {
+  const [year, month, day] = value.split('-').map(Number);
+  return Date.UTC(year, month - 1, day);
+}
+
+export function getMalaysiaTodayString() {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Kuala_Lumpur',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(new Date());
+
+  const year = parts.find((part) => part.type === 'year')?.value ?? '1970';
+  const month = parts.find((part) => part.type === 'month')?.value ?? '01';
+  const day = parts.find((part) => part.type === 'day')?.value ?? '01';
+
+  return `${year}-${month}-${day}`;
+}
+
+export function getRemainingDaysFromMalaysiaToday(expireDate: string | null | undefined) {
+  if (!expireDate) {
+    return null;
+  }
+
+  return Math.ceil((dateToUtcDay(expireDate) - dateToUtcDay(getMalaysiaTodayString())) / 86_400_000);
+}
+
 export function isDateActive(expireDate: string | null | undefined) {
   if (!expireDate) {
     return true;
   }
 
-  const today = new Date();
-  const end = new Date(`${expireDate}T23:59:59`);
-  return today.getTime() <= end.getTime();
+  return getMalaysiaTodayString() <= expireDate;
 }
 
 export function getFeatureExpireDate(featureExpiries: FeatureExpiries | null | undefined, feature: FeaturePermission, fallbackDate?: string | null) {

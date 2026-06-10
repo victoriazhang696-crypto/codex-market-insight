@@ -79,7 +79,16 @@ export default async function DrivingSchoolDetailPage({ params }: Params) {
           ) : null}
           {content.attachmentUrl ? (
             content.attachmentUrl.match(/\.(png|jpe?g|webp|gif)(\?|$)/i) ? (
-              <img className="personal-attachment-image" src={content.attachmentUrl} alt="附件图片" />
+              <a
+                className="personal-attachment-image-link"
+                href={content.attachmentUrl}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="打开附件图片大图"
+              >
+                <img className="personal-attachment-image" src={content.attachmentUrl} alt="附件图片" />
+                <small>点击查看大图</small>
+              </a>
             ) : (
               <a href={content.attachmentUrl} target="_blank" rel="noreferrer">打开附件 / PDF</a>
             )
