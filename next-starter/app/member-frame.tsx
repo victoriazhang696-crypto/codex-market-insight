@@ -1,5 +1,6 @@
 import { hasActiveFeaturePermission, type FeaturePermission } from '@/lib/feature-permissions';
 import { getCurrentMemberProfile } from '@/lib/member-profile';
+import { getCurrentMemberPersonalContents } from '@/lib/personal-content';
 import MemberNav from './member-nav';
 
 const sidebarItems = [
@@ -23,7 +24,11 @@ type Props = {
 };
 
 export default async function MemberFrame({ activePath, eyebrow, title, description, children }: Props) {
-  const profile = await getCurrentMemberProfile();
+  const [profile, drivingContents] = await Promise.all([
+    getCurrentMemberProfile(),
+    getCurrentMemberPersonalContents('driving_school')
+  ]);
+  const drivingBadgeSignature = drivingContents.map((item) => item.id).join('|');
 
   return (
     <main className="member-dashboard">
@@ -38,7 +43,15 @@ export default async function MemberFrame({ activePath, eyebrow, title, descript
               profile?.status === 'active' &&
               hasActiveFeaturePermission(profile.featurePermissions, profile.featureExpiries, item.permission, profile.expireDate)
             );
-            return { ...item, enabled, active: activePath === item.href };
+            const badgeCount = item.href === '/driving-school' ? drivingContents.length : 0;
+            return {
+              ...item,
+              enabled,
+              active: activePath === item.href,
+              badgeCount,
+              badgeKey: badgeCount > 0 ? item.href : undefined,
+              badgeSignature: item.href === '/driving-school' ? drivingBadgeSignature : undefined
+            };
           })}
         />
       </aside>

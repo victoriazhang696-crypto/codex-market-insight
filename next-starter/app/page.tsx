@@ -1,6 +1,7 @@
 import { getAnnouncements, getPublishedArticles, isPublishedTodayInMalaysia } from '@/lib/content';
 import { getFeatureExpireDate, hasActiveFeaturePermission, type FeaturePermission } from '@/lib/feature-permissions';
 import { getCurrentMemberProfile } from '@/lib/member-profile';
+import { getCurrentMemberPersonalContents } from '@/lib/personal-content';
 import MemberNav, { type MemberNavItem } from './member-nav';
 
 const serviceCards = [
@@ -121,10 +122,11 @@ function getFeatureExpirySummary(expireDate: string | null) {
 }
 
 export default async function MemberHomePage() {
-  const [profile, publishedArticles, notices] = await Promise.all([
+  const [profile, publishedArticles, notices, drivingContents] = await Promise.all([
     getCurrentMemberProfile(),
     getPublishedArticles(),
-    getAnnouncements()
+    getAnnouncements(),
+    getCurrentMemberPersonalContents('driving_school')
   ]);
 
   const canUse = (permission: FeaturePermission) =>
@@ -150,13 +152,22 @@ export default async function MemberHomePage() {
 
   const navItems: MemberNavItem[] = sidebarItems.map((item) => {
     const enabled = item.href === '/logout' || canUse(item.permission);
-    const badgeCount = item.href === '/today' ? todaysMarketArticles.length : item.href === '/announcements' ? notices.length : 0;
+    const badgeCount =
+      item.href === '/today'
+        ? todaysMarketArticles.length
+        : item.href === '/announcements'
+          ? notices.length
+          : item.href === '/driving-school'
+            ? drivingContents.length
+            : 0;
     const badgeSignature =
       item.href === '/today'
         ? todaysMarketArticles.map((article) => article.id).join('|')
         : item.href === '/announcements'
           ? notices.map((notice) => notice.id).join('|')
-          : '';
+          : item.href === '/driving-school'
+            ? drivingContents.map((content) => content.id).join('|')
+            : '';
 
     return {
       ...item,
@@ -261,6 +272,8 @@ export default async function MemberHomePage() {
                   ? historicalMarketArticles[0]?.title
                   : item.href === '/today'
                     ? latestToday?.summary
+                    : item.href === '/driving-school'
+                      ? drivingContents[0]?.title
                     : '';
 
             return (

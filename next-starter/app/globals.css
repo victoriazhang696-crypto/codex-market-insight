@@ -1415,6 +1415,60 @@ h1 {
   font-weight: 900;
 }
 
+.personal-index-list {
+  display: grid;
+  gap: 14px;
+}
+
+.personal-index-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 20px;
+  border: 1px solid rgba(69, 242, 255, 0.16);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at top right, rgba(35, 240, 131, 0.1), transparent 34%),
+    linear-gradient(135deg, rgba(8, 37, 78, 0.78), rgba(4, 18, 42, 0.92));
+}
+
+.personal-index-card div {
+  display: grid;
+  gap: 8px;
+}
+
+.personal-index-card time,
+.personal-index-card small {
+  color: #88a5cc;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.personal-index-card strong {
+  color: #fff;
+  font-size: clamp(20px, 2vw, 30px);
+  line-height: 1.25;
+}
+
+.personal-index-card p {
+  max-width: 900px;
+  margin: 0;
+  color: #c7d5ef;
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.personal-index-card a {
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #2c7cff, #1d35db);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
 @media (max-width: 900px) {
   .hero-grid,
   .card-grid,
@@ -1699,6 +1753,14 @@ h1 {
   .member-list-row {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .personal-index-card {
+    grid-template-columns: 1fr;
+  }
+
+  .personal-index-card a {
+    width: fit-content;
   }
 
   .page-card-grid {

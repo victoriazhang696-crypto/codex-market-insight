@@ -30,6 +30,8 @@ function mapPersonalContent(row: Record<string, unknown>): PersonalContent {
   };
 }
 
+const personalContentSelect = 'id, service_key, target_user_id, title, body, content_type, attachment_url, status, created_at, updated_at';
+
 export async function getCurrentMemberPersonalContents(serviceKey: FeaturePermission) {
   const [profile, canAccess] = await Promise.all([
     getCurrentMemberProfile(),
@@ -44,7 +46,7 @@ export async function getCurrentMemberPersonalContents(serviceKey: FeaturePermis
     const supabase = await createSupabaseServerClient();
     const { data, error } = await supabase
       .from('personal_contents')
-      .select('id, service_key, target_user_id, title, body, content_type, attachment_url, status, created_at, updated_at')
+      .select(personalContentSelect)
       .eq('service_key', serviceKey)
       .eq('target_user_id', profile.id)
       .eq('status', 'published')
@@ -57,5 +59,36 @@ export async function getCurrentMemberPersonalContents(serviceKey: FeaturePermis
     return data.map((row) => mapPersonalContent(row));
   } catch {
     return [];
+  }
+}
+
+export async function getCurrentMemberPersonalContentById(serviceKey: FeaturePermission, id: string) {
+  const [profile, canAccess] = await Promise.all([
+    getCurrentMemberProfile(),
+    canCurrentMemberAccess(serviceKey)
+  ]);
+
+  if (!profile || !canAccess) {
+    return null;
+  }
+
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from('personal_contents')
+      .select(personalContentSelect)
+      .eq('id', id)
+      .eq('service_key', serviceKey)
+      .eq('target_user_id', profile.id)
+      .eq('status', 'published')
+      .maybeSingle();
+
+    if (error || !data) {
+      return null;
+    }
+
+    return mapPersonalContent(data);
+  } catch {
+    return null;
   }
 }
