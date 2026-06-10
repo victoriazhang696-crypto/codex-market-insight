@@ -16,6 +16,7 @@ export default async function AdminPage() {
         <div className="inline-actions">
           <a className="primary-link" href="/admin/members">客户管理</a>
           <a className="secondary-link" href="/admin/articles">文章发布</a>
+          <a className="secondary-link" href="/admin/driving-school">环球驾校专属</a>
           <a className="secondary-link" href="/admin/analytics">统计面板</a>
           <a className="secondary-link" href="/logout">退出登录</a>
         </div>

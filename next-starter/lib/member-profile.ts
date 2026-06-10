@@ -9,6 +9,7 @@ import {
 } from '@/lib/feature-permissions';
 
 export type MemberProfile = {
+  id: string;
   accountNumber: string;
   fullName: string;
   expireDate: string | null;
@@ -56,6 +57,7 @@ export async function getCurrentMemberProfile(): Promise<MemberProfile | null> {
     }
 
     return {
+      id: authData.user.id,
       accountNumber: fallbackResult.data.account_number ?? '',
       fullName: fallbackResult.data.full_name ?? '会员',
       expireDate: fallbackResult.data.expire_date ?? null,
@@ -67,6 +69,7 @@ export async function getCurrentMemberProfile(): Promise<MemberProfile | null> {
   }
 
   return {
+    id: authData.user.id,
     accountNumber: data.account_number ?? '',
     fullName: data.full_name ?? '会员',
     expireDate: data.expire_date ?? null,

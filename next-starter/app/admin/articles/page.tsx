@@ -4,6 +4,8 @@ import { FormEvent, useEffect, useState } from 'react';
 
 import { articleCategories, getArticleCategoryLabel, type ArticleCategory } from '@/lib/article-categories';
 
+const publishableArticleCategories = articleCategories.filter((item) => item.value !== 'driving_school');
+
 export default function AdminArticlesPage() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -126,7 +128,7 @@ export default function AdminArticlesPage() {
           <label>
             <span>发布到</span>
             <select name="category" defaultValue="market_today">
-              {articleCategories.map((item) => (
+              {publishableArticleCategories.map((item) => (
                 <option key={item.value} value={item.value}>{item.label}</option>
               ))}
             </select>

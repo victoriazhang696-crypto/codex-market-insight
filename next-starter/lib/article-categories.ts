@@ -1,4 +1,11 @@
-export type ArticleCategory = 'market_today' | 'market_history' | 'paipao_special' | 'us_review' | 'member_notice' | 'ai_service';
+export type ArticleCategory =
+  | 'market_today'
+  | 'market_history'
+  | 'paipao_special'
+  | 'us_review'
+  | 'member_notice'
+  | 'ai_service'
+  | 'driving_school';
 
 export const articleCategories: Array<{ value: ArticleCategory; label: string; description: string }> = [
   {
@@ -30,6 +37,11 @@ export const articleCategories: Array<{ value: ArticleCategory; label: string; d
     value: 'ai_service',
     label: '待解锁AI服务',
     description: '预留给后续深度并入的 AI 工具或专项功能。'
+  },
+  {
+    value: 'driving_school',
+    label: '环球驾校专属',
+    description: '给指定铁粉客户开通的定向定制内容服务。'
   }
 ];
 

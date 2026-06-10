@@ -5,6 +5,8 @@ import { FormEvent, useState } from 'react';
 import { articleCategories, type ArticleCategory } from '@/lib/article-categories';
 import type { ContentArticle } from '@/lib/content';
 
+const publishableArticleCategories = articleCategories.filter((item) => item.value !== 'driving_school');
+
 type Props = {
   article: ContentArticle;
 };
@@ -57,7 +59,7 @@ export function ArticleEditorForm({ article }: Props) {
       <label>
         <span>发布到</span>
         <select name="category" defaultValue={article.category}>
-          {articleCategories.map((item) => (
+          {publishableArticleCategories.map((item) => (
             <option key={item.value} value={item.value}>{item.label}</option>
           ))}
         </select>

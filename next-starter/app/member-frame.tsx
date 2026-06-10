@@ -10,7 +10,8 @@ const sidebarItems = [
   { label: 'US复盘简报', href: '/us-review', permission: 'us_review', icon: '05' },
   { label: '待解锁AI服务', href: '/soon', permission: 'ai_service', icon: '06' },
   { label: '陪跑专项', href: '/specials', permission: 'paipao_special', icon: '07' },
-  { label: '退出登录', href: '/logout', permission: 'member_notice', icon: '08' }
+  { label: '环球驾校专属', href: '/driving-school', permission: 'driving_school', icon: '08' },
+  { label: '退出登录', href: '/logout', permission: 'member_notice', icon: '09' }
 ] satisfies Array<{ label: string; href: string; permission: FeaturePermission; icon: string }>;
 
 type Props = {

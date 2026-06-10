@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { createSupabaseMiddlewareClient } from '@/lib/supabase/middleware';
 
 const publicPaths = ['/login', '/admin-login'];
-const memberPathPrefixes = ['/', '/today', '/history', '/announcements', '/soon', '/specials', '/us-review'];
+const memberPathPrefixes = ['/', '/today', '/history', '/announcements', '/soon', '/specials', '/us-review', '/driving-school'];
 
 async function getRole(request: NextRequest, response: NextResponse) {
   const supabase = createSupabaseMiddlewareClient(request, response);
@@ -32,6 +32,16 @@ export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
   if (publicPaths.includes(pathname)) {
+    return response;
+  }
+
+  if (pathname.startsWith('/api/admin')) {
+    const session = await getRole(request, response);
+
+    if (!session.userId || session.role !== 'admin') {
+      return NextResponse.json({ ok: false, message: 'Admin access required.' }, { status: 401 });
+    }
+
     return response;
   }
 
@@ -83,5 +93,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/', '/today/:path*', '/history/:path*', '/announcements/:path*', '/soon/:path*', '/specials/:path*', '/us-review/:path*', '/login', '/admin-login']
+  matcher: ['/api/admin/:path*', '/admin/:path*', '/', '/today/:path*', '/history/:path*', '/announcements/:path*', '/soon/:path*', '/specials/:path*', '/us-review/:path*', '/driving-school/:path*', '/login', '/admin-login']
 };
