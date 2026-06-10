@@ -947,6 +947,40 @@ h1 {
   color: #fff;
 }
 
+.vip-feature-expiry-list {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 9px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.vip-feature-expiry-list > span {
+  color: #45f2ff;
+  font-size: 13px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.vip-feature-expiry-list div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: #dce7ff;
+}
+
+.vip-feature-expiry-list strong {
+  font-size: 13px;
+}
+
+.vip-feature-expiry-list small {
+  color: #9fb5dc;
+  font-weight: 800;
+}
+
 .status-active {
   color: #23f083 !important;
 }
@@ -1097,6 +1131,7 @@ h1 {
 .mini-service-card p {
   display: grid;
   gap: 5px;
+  min-height: 62px;
   color: #dce7ff;
   line-height: 1.55;
 }
@@ -1111,6 +1146,26 @@ h1 {
   color: #3d85ff;
   text-decoration: none;
   font-weight: 900;
+}
+
+.service-expiry {
+  display: grid;
+  gap: 4px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(132, 170, 255, 0.14);
+}
+
+.service-expiry span {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.service-expiry small {
+  color: #9fb5dc;
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .service-heading {
@@ -1245,6 +1300,119 @@ h1 {
   min-height: 260px;
   display: grid;
   place-content: center;
+}
+
+.personal-report-card {
+  display: grid;
+  gap: 22px;
+  padding: 28px;
+  border: 1px solid rgba(69, 242, 255, 0.18);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at top right, rgba(35, 240, 131, 0.14), transparent 34%),
+    linear-gradient(145deg, rgba(8, 37, 78, 0.84), rgba(4, 15, 34, 0.94));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+}
+
+.personal-report-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(132, 170, 255, 0.16);
+}
+
+.personal-report-head span {
+  color: #45f2ff;
+  font-size: 13px;
+  font-weight: 1000;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.personal-report-head h2 {
+  margin: 8px 0 0;
+  color: #fff;
+  font-size: clamp(26px, 2.6vw, 40px);
+  line-height: 1.18;
+}
+
+.personal-report-head time {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  border: 1px solid rgba(69, 242, 255, 0.24);
+  border-radius: 999px;
+  color: #b8c8e8;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.personal-report-summary {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid rgba(35, 240, 131, 0.18);
+  border-radius: 16px;
+  background: rgba(35, 240, 131, 0.06);
+}
+
+.personal-report-summary strong {
+  color: #23f083;
+  font-size: 15px;
+}
+
+.personal-report-summary p {
+  margin: 0;
+  color: #e8f0ff;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.75;
+}
+
+.personal-report-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.personal-report-section {
+  display: grid;
+  gap: 12px;
+  min-height: 180px;
+  padding: 20px;
+  border: 1px solid rgba(132, 170, 255, 0.16);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.personal-report-section span {
+  color: #45f2ff;
+  font-size: 12px;
+  font-weight: 1000;
+}
+
+.personal-report-section h3 {
+  margin: 0;
+  color: #45f2ff;
+  font-size: 22px;
+}
+
+.personal-report-section p {
+  margin: 0;
+  color: #dce7ff;
+  font-size: 16px;
+  line-height: 1.85;
+}
+
+.personal-report-card > a {
+  width: fit-content;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #2c7cff, #1d35db);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 900;
 }
 
 @media (max-width: 900px) {
@@ -1505,6 +1673,27 @@ h1 {
   .member-page-panel,
   .market-article-panel {
     padding: 20px;
+  }
+
+  .personal-report-card {
+    padding: 20px;
+  }
+
+  .personal-report-head {
+    flex-direction: column;
+  }
+
+  .personal-report-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .personal-report-summary p {
+    font-size: 16px;
+  }
+
+  .personal-report-section {
+    min-height: auto;
+    padding: 18px;
   }
 
   .member-list-row {

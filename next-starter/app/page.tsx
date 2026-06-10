@@ -1,5 +1,5 @@
 import { getAnnouncements, getPublishedArticles, isPublishedTodayInMalaysia } from '@/lib/content';
-import { hasActiveFeaturePermission, type FeaturePermission } from '@/lib/feature-permissions';
+import { getFeatureExpireDate, hasActiveFeaturePermission, type FeaturePermission } from '@/lib/feature-permissions';
 import { getCurrentMemberProfile } from '@/lib/member-profile';
 import MemberNav, { type MemberNavItem } from './member-nav';
 
@@ -93,6 +93,33 @@ function titleMatchesToday(title: string) {
   return Number(dateMatch[1]) === Number(today.month) && Number(dateMatch[2]) === Number(today.day);
 }
 
+function getRemainingDays(expireDate: string | null) {
+  if (!expireDate) {
+    return null;
+  }
+
+  const today = new Date();
+  const end = new Date(`${expireDate}T00:00:00`);
+  today.setHours(0, 0, 0, 0);
+
+  return Math.ceil((end.getTime() - today.getTime()) / 86_400_000);
+}
+
+function getFeatureExpirySummary(expireDate: string | null) {
+  if (!expireDate) {
+    return {
+      dateText: '长期有效',
+      daysText: '未设置单独期限'
+    };
+  }
+
+  const days = getRemainingDays(expireDate);
+  return {
+    dateText: `有效至 ${expireDate}`,
+    daysText: days === null ? '未设置' : days >= 0 ? `剩余 ${days} 天` : '已到期'
+  };
+}
+
 export default async function MemberHomePage() {
   const [profile, publishedArticles, notices] = await Promise.all([
     getCurrentMemberProfile(),
@@ -102,6 +129,8 @@ export default async function MemberHomePage() {
 
   const canUse = (permission: FeaturePermission) =>
     hasActiveFeaturePermission(profile?.featurePermissions, profile?.featureExpiries, permission, profile?.expireDate);
+  const getFeatureExpiry = (permission: FeaturePermission) =>
+    getFeatureExpireDate(profile?.featureExpiries, permission, profile?.expireDate);
 
   const todaysMarketArticles = publishedArticles.filter(
     (article) => article.category === 'market_today' && isPublishedTodayInMalaysia(article) && titleMatchesToday(article.title)
@@ -138,6 +167,12 @@ export default async function MemberHomePage() {
       badgeSignature
     };
   });
+  const activeFeatureSummaries = serviceCards
+    .filter((item) => canUse(item.permission))
+    .map((item) => ({
+      label: item.title,
+      ...getFeatureExpirySummary(getFeatureExpiry(item.permission))
+    }));
 
   return (
     <main className="member-dashboard">
@@ -193,6 +228,15 @@ export default async function MemberHomePage() {
                 <dd className={profile?.status === 'active' ? 'status-active' : ''}>{profile?.status ?? 'active'}</dd>
               </div>
             </dl>
+            <div className="vip-feature-expiry-list">
+              <span>栏目剩余</span>
+              {activeFeatureSummaries.slice(0, 5).map((item) => (
+                <div key={item.label}>
+                  <strong>{item.label}</strong>
+                  <small>{item.daysText}</small>
+                </div>
+              ))}
+            </div>
             <a className="renew-button" href="/soon">续费会员</a>
           </aside>
         </section>
@@ -209,6 +253,7 @@ export default async function MemberHomePage() {
         <section className="dashboard-cards compact-cards">
           {serviceCards.map((item) => {
             const enabled = canUse(item.permission);
+            const expiry = getFeatureExpirySummary(getFeatureExpiry(item.permission));
             const preview =
               item.href === '/announcements'
                 ? notices[0]?.title
@@ -225,6 +270,10 @@ export default async function MemberHomePage() {
                   <strong>{enabled ? 'ON' : 'LOCK'}</strong>
                 </div>
                 <p>{preview || item.body}</p>
+                <div className="service-expiry">
+                  <span>{enabled ? expiry.dateText : '暂未开通'}</span>
+                  <small>{enabled ? expiry.daysText : '联系顾问开通权限'}</small>
+                </div>
                 <a href={enabled ? item.href : '/soon'}>{enabled ? '进入服务' : '了解解锁'}</a>
               </article>
             );
