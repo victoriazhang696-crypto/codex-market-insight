@@ -57,17 +57,11 @@ export async function getPublishedArticles() {
       .order('published_at', { ascending: false });
 
     if (error) {
-      const { data: fallbackData, error: fallbackError } = await supabase
-        .from('articles')
-        .select('id, slug, title, summary, content, risk_notice, status, published_at')
-        .eq('status', 'published')
-        .order('published_at', { ascending: false });
-
-      if (fallbackError || !fallbackData?.length) {
+      if (error.message.toLowerCase().includes('content_category')) {
         return [];
       }
 
-      return fallbackData.map((row) => mapArticle(row));
+      return [];
     }
 
     if (!data?.length) {
@@ -138,15 +132,8 @@ export async function getArticleBySlug(slug: string) {
       return mapArticle(data);
     }
 
-    const fallbackResult = await supabase
-      .from('articles')
-      .select('id, slug, title, summary, content, risk_notice, status, published_at')
-      .eq('slug', decodedSlug)
-      .eq('status', 'published')
-      .single();
-
-    if (!fallbackResult.error && fallbackResult.data) {
-      return mapArticle(fallbackResult.data);
+    if (error?.message.toLowerCase().includes('content_category')) {
+      return null;
     }
   } catch {
     // Fall through to list lookup below.
@@ -164,6 +151,10 @@ export async function getAnyArticleBySlug(slug: string) {
       .select('id, slug, title, summary, content, risk_notice, status, content_category, published_at')
       .eq('slug', slug)
       .single();
+
+    if (error?.message.toLowerCase().includes('content_category')) {
+      return null;
+    }
 
     if (error || !data) {
       const articles = await getPublishedArticles();

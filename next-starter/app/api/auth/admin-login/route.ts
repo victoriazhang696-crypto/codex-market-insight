@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { adminAccountNumberToEmail, isEightDigitAccountNumber } from '@/lib/account';
+import { getRequestCookieMap, jsonWithRouteCookies } from '@/lib/supabase/route-cookies';
 import { createSupabaseRouteClient } from '@/lib/supabase/route-client';
 
 type AdminLoginBody = {
@@ -15,7 +16,7 @@ export async function POST(request: Request) {
   const email = body.email?.trim() ?? '';
   const password = body.password?.trim() ?? '';
   const cookieResponse = NextResponse.next();
-  const requestCookies = new Map<string, string>();
+  const requestCookies = getRequestCookieMap(request);
   const supabase = createSupabaseRouteClient(
     request,
     cookieResponse,
@@ -38,13 +39,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, message: '管理员账号必须是8位数字。' }, { status: 400 });
   }
 
+  await supabase.auth.signOut();
+
   const { data, error } = await supabase.auth.signInWithPassword({
     email: accountNumber ? adminAccountNumberToEmail(accountNumber) : email,
     password
   });
 
   if (error) {
-    return NextResponse.json({ ok: false, message: error.message }, { status: 401 });
+    return jsonWithRouteCookies({ ok: false, message: error.message }, cookieResponse, { status: 401 });
   }
 
   const { data: profile } = await supabase
@@ -55,20 +58,14 @@ export async function POST(request: Request) {
 
   if (profile?.role !== 'admin') {
     await supabase.auth.signOut();
-    return NextResponse.json({ ok: false, message: 'Not an admin account.' }, { status: 403 });
+    return jsonWithRouteCookies({ ok: false, message: 'Not an admin account.' }, cookieResponse, { status: 403 });
   }
 
-  const response = NextResponse.json({
+  return jsonWithRouteCookies({
     ok: true,
     user: {
       id: data.user.id,
       email: data.user.email
     }
-  });
-
-  for (const cookie of cookieResponse.cookies.getAll()) {
-    response.cookies.set(cookie);
-  }
-
-  return response;
+  }, cookieResponse);
 }

@@ -41,18 +41,18 @@ export async function getCurrentMemberProfile(): Promise<MemberProfile | null> {
 
   const { data } = await supabase
     .from('profiles')
-    .select('account_number, full_name, expire_date, status, feature_permissions, feature_expiries')
+    .select('account_number, full_name, expire_date, status, role, feature_permissions, feature_expiries')
     .eq('id', authData.user.id)
     .single();
 
   if (!data) {
     const fallbackResult = await supabase
       .from('profiles')
-      .select('account_number, full_name, expire_date, status')
+      .select('account_number, full_name, expire_date, status, role')
       .eq('id', authData.user.id)
       .single();
 
-    if (!fallbackResult.data) {
+    if (!fallbackResult.data || fallbackResult.data.role !== 'member') {
       return null;
     }
 
@@ -66,6 +66,10 @@ export async function getCurrentMemberProfile(): Promise<MemberProfile | null> {
       featureExpiries: {},
       remainingDays: getRemainingDays(fallbackResult.data.expire_date ?? null)
     };
+  }
+
+  if (data.role !== 'member') {
+    return null;
   }
 
   return {

@@ -38,19 +38,13 @@ export async function PATCH(request: Request, { params }: Params) {
     .single();
 
   if (error && (error.message.toLowerCase().includes('feature_permissions') || error.message.toLowerCase().includes('feature_expiries'))) {
-    const { feature_permissions: _featurePermissions, feature_expiries: _featureExpiries, ...legacyUpdates } = updates;
-    const legacyResult = await supabase
-      .from('profiles')
-      .update(legacyUpdates)
-      .eq('id', id)
-      .select('id, account_number, full_name, phone, expire_date, status')
-      .single();
-
-    if (legacyResult.error) {
-      return NextResponse.json({ ok: false, message: legacyResult.error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ ok: true, member: legacyResult.data });
+    return NextResponse.json(
+      {
+        ok: false,
+        message: '数据库缺少 profiles.feature_permissions 或 profiles.feature_expiries 字段。请先在 Supabase 重新运行 supabase-driving-school.sql。'
+      },
+      { status: 500 }
+    );
   }
 
   if (error) {
@@ -69,21 +63,18 @@ export async function GET(request: Request, { params }: Params) {
     .eq('id', id)
     .single();
 
+  if (error && (error.message.toLowerCase().includes('feature_permissions') || error.message.toLowerCase().includes('feature_expiries'))) {
+    return NextResponse.json(
+      {
+        ok: false,
+        message: '数据库缺少 profiles.feature_permissions 或 profiles.feature_expiries 字段。请先在 Supabase 重新运行 supabase-driving-school.sql。'
+      },
+      { status: 500 }
+    );
+  }
+
   if (error) {
-    const fallbackResult = await supabase
-      .from('profiles')
-      .select('id, account_number, full_name, phone, expire_date, status')
-      .eq('id', id)
-      .single();
-
-    if (fallbackResult.error) {
-      return NextResponse.json({ ok: false, message: fallbackResult.error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({
-      ok: true,
-      member: fallbackResult.data
-    });
+    return NextResponse.json({ ok: false, message: error.message }, { status: 500 });
   }
 
   return NextResponse.json({

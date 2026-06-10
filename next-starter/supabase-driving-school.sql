@@ -5,6 +5,12 @@ alter table if exists public.profiles
   add column if not exists feature_permissions jsonb default '["market_today","market_history","member_notice"]'::jsonb,
   add column if not exists feature_expiries jsonb default '{}'::jsonb;
 
+alter table if exists public.articles
+  add column if not exists content_category text not null default 'market_today';
+
+create index if not exists articles_content_category_idx
+  on public.articles(content_category, status, published_at desc);
+
 create table if not exists public.personal_contents (
   id uuid primary key default gen_random_uuid(),
   service_key text not null default 'driving_school',

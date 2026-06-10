@@ -76,7 +76,11 @@ export async function middleware(request: NextRequest) {
     }
 
     if (session.role !== 'member') {
-      return response;
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      url.searchParams.set('reason', 'member_required');
+      url.searchParams.set('next', pathname);
+      return NextResponse.redirect(url);
     }
 
     if (session.status !== 'active') {

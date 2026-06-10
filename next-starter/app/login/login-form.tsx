@@ -94,6 +94,9 @@ export default function LoginForm({ searchParams }: LoginFormProps) {
         {searchParams.reason === 'inactive' ? (
           <p className="subtle">您的阅读权限已到期，请联系顾问续期开通。</p>
         ) : null}
+        {searchParams.reason === 'member_required' ? (
+          <p className="subtle">请使用会员账号登录客户前端。管理员账号只能进入管理后台。</p>
+        ) : null}
         <form className="form-stack" onSubmit={onSubmit}>
           <label>
             <span>8位账号</span>

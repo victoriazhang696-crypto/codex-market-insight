@@ -25,17 +25,7 @@ export async function getAdminArticleBySlug(slug: string) {
     .single();
 
   if (error) {
-    const { data: fallbackData, error: fallbackError } = await supabase
-      .from('articles')
-      .select('id, slug, title, summary, content, risk_notice, status, published_at')
-      .eq('slug', slug)
-      .single();
-
-    if (fallbackError || !fallbackData) {
-      return null;
-    }
-
-    return mapArticle(fallbackData);
+    return null;
   }
 
   if (!data) {

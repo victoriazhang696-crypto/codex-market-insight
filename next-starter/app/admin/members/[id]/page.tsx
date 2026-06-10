@@ -87,8 +87,13 @@ export default function AdminMemberEditorPage() {
         body: JSON.stringify(payload)
       });
 
-      const result = (await response.json()) as { ok: boolean; message?: string };
-      setMessage(result.ok ? '客户资料已保存。' : result.message ?? '保存失败');
+      const result = (await response.json()) as { ok: boolean; member?: MemberRecord; message?: string };
+
+      if (result.ok && result.member) {
+        setMember(result.member);
+      }
+
+      setMessage(result.ok ? '客户资料已保存，权限和单独期限已同步。' : result.message ?? '保存失败');
     } catch {
       setMessage('网络请求失败');
     } finally {
