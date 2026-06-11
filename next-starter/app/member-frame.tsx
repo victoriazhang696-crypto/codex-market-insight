@@ -1,3 +1,4 @@
+import { getAnnouncements, getHistoricalMarketArticles, getPublishedArticlesByCategory, getTodaysMarketArticles } from '@/lib/content';
 import { hasActiveFeaturePermission, type FeaturePermission } from '@/lib/feature-permissions';
 import { getCurrentMemberProfile } from '@/lib/member-profile';
 import { getCurrentMemberPersonalContents } from '@/lib/personal-content';
@@ -24,11 +25,37 @@ type Props = {
 };
 
 export default async function MemberFrame({ activePath, eyebrow, title, description, children }: Props) {
-  const [profile, drivingContents] = await Promise.all([
+  const [profile, drivingContents, todayArticles, historicalArticles, usReviewArticles, notices] = await Promise.all([
     getCurrentMemberProfile(),
-    getCurrentMemberPersonalContents('driving_school')
+    getCurrentMemberPersonalContents('driving_school'),
+    getTodaysMarketArticles(),
+    getHistoricalMarketArticles(),
+    getPublishedArticlesByCategory('us_review'),
+    getAnnouncements()
   ]);
   const drivingBadgeSignature = drivingContents.map((item) => item.id).join('|');
+  const articleBadges: Record<string, { count: number; signature: string }> = {
+    '/today': {
+      count: todayArticles.length,
+      signature: todayArticles.map((item) => item.id).join('|')
+    },
+    '/history': {
+      count: historicalArticles.length,
+      signature: historicalArticles.map((item) => item.id).join('|')
+    },
+    '/us-review': {
+      count: usReviewArticles.length,
+      signature: usReviewArticles.map((item) => item.id).join('|')
+    },
+    '/announcements': {
+      count: notices.length,
+      signature: notices.map((item) => item.id).join('|')
+    },
+    '/driving-school': {
+      count: drivingContents.length,
+      signature: drivingBadgeSignature
+    }
+  };
 
   return (
     <main className="member-dashboard">
@@ -43,14 +70,15 @@ export default async function MemberFrame({ activePath, eyebrow, title, descript
               profile?.status === 'active' &&
               hasActiveFeaturePermission(profile.featurePermissions, profile.featureExpiries, item.permission, profile.expireDate)
             );
-            const badgeCount = item.href === '/driving-school' ? drivingContents.length : 0;
+            const badge = articleBadges[item.href];
+            const badgeCount = badge?.count ?? 0;
             return {
               ...item,
               enabled,
               active: activePath === item.href,
               badgeCount,
               badgeKey: badgeCount > 0 ? item.href : undefined,
-              badgeSignature: item.href === '/driving-school' ? drivingBadgeSignature : undefined
+              badgeSignature: badge?.signature
             };
           })}
         />

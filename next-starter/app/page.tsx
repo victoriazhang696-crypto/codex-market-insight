@@ -133,6 +133,7 @@ export default async function MemberHomePage() {
   const historicalMarketArticles = publishedArticles
     .filter((article) => article.category === 'market_history' || (article.category === 'market_today' && !isPublishedTodayInMalaysia(article)))
     .slice(0, 3);
+  const usReviewArticles = publishedArticles.filter((article) => article.category === 'us_review');
   const latestToday = todaysMarketArticles[0];
 
   const expireText = profile?.expireDate ?? '未设置';
@@ -150,19 +151,27 @@ export default async function MemberHomePage() {
     const badgeCount =
       item.href === '/today'
         ? todaysMarketArticles.length
+        : item.href === '/history'
+          ? historicalMarketArticles.length
         : item.href === '/announcements'
           ? notices.length
-          : item.href === '/driving-school'
-            ? drivingContents.length
-            : 0;
+          : item.href === '/us-review'
+            ? usReviewArticles.length
+            : item.href === '/driving-school'
+              ? drivingContents.length
+              : 0;
     const badgeSignature =
       item.href === '/today'
         ? todaysMarketArticles.map((article) => article.id).join('|')
+        : item.href === '/history'
+          ? historicalMarketArticles.map((article) => article.id).join('|')
         : item.href === '/announcements'
           ? notices.map((notice) => notice.id).join('|')
-          : item.href === '/driving-school'
-            ? drivingContents.map((content) => content.id).join('|')
-            : '';
+          : item.href === '/us-review'
+            ? usReviewArticles.map((article) => article.id).join('|')
+            : item.href === '/driving-school'
+              ? drivingContents.map((content) => content.id).join('|')
+              : '';
 
     return {
       ...item,
