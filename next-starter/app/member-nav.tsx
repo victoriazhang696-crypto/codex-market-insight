@@ -49,7 +49,7 @@ export default function MemberNav({ items, ariaLabel }: Props) {
           <a
             key={item.href}
             className={`${item.active ? 'active' : ''} ${item.enabled ? '' : 'locked'}`}
-            href={item.enabled ? item.href : '/soon'}
+            href={item.href}
             aria-disabled={!item.enabled}
             onClick={() => rememberBadge(item)}
           >

@@ -12,9 +12,10 @@ export default async function SoonPage() {
   const canAccess = await canCurrentMemberAccess('ai_service');
   if (!canAccess) {
     return (
-      <MemberFrame activePath="/soon" eyebrow="待解锁 AI 服务" title="该栏目暂未开通">
+      <MemberFrame activePath="/soon" eyebrow="待解锁 AI 服务" title="当前功能暂未开通">
         <section className="member-page-panel empty-state">
-          <p className="lede">后续如需体验 AI 市场助理或股票分析，可联系顾问开通。</p>
+          <p className="lede">该功能暂未给当前账号开通。你可以返回首页查看已开通服务，或联系顾问开通。</p>
+          <a className="secondary-link" href="/">返回首页</a>
         </section>
       </MemberFrame>
     );

@@ -235,7 +235,7 @@ export default async function MemberHomePage() {
                 <dd>{expireText}</dd>
               </div>
               <div>
-                <dt>剩余时间</dt>
+                <dt>账号剩余</dt>
                 <dd>{remainingText}</dd>
               </div>
               <div>
@@ -291,7 +291,7 @@ export default async function MemberHomePage() {
                   <span>{enabled ? expiry.dateText : '暂未开通'}</span>
                   <small>{enabled ? expiry.daysText : '联系顾问开通权限'}</small>
                 </div>
-                <a href={enabled ? item.href : '/soon'}>{enabled ? '进入服务' : '了解解锁'}</a>
+                <a href={item.href}>{enabled ? '进入服务' : '了解解锁'}</a>
               </article>
             );
           })}
