@@ -2,7 +2,6 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import {
   getRemainingDaysFromMalaysiaToday,
   hasActiveFeaturePermission,
-  isDateActive,
   normalizeFeatureExpiries,
   normalizeFeaturePermissions,
   type FeatureExpiries,
@@ -80,9 +79,9 @@ export async function canCurrentMemberAccess(feature: FeaturePermission) {
     return false;
   }
 
-  if (profile.status !== 'active' || !isDateActive(profile.expireDate)) {
+  if (profile.status !== 'active') {
     return false;
   }
 
-  return hasActiveFeaturePermission(profile.featurePermissions, profile.featureExpiries, feature, profile.expireDate);
+  return hasActiveFeaturePermission(profile.featurePermissions, profile.featureExpiries, feature);
 }

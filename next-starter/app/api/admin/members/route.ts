@@ -14,7 +14,6 @@ type MemberCreateBody = {
   accountNumber?: string;
   fullName?: string;
   phone?: string;
-  expireDate?: string;
   permissions?: FeaturePermission[];
   permissionExpiries?: FeatureExpiries;
 };
@@ -24,7 +23,6 @@ export async function POST(request: Request) {
   const accountNumber = body.accountNumber?.trim() ?? '';
   const fullName = body.fullName?.trim() ?? '';
   const phone = normalizePhonePassword(body.phone ?? '');
-  const expireDate = body.expireDate?.trim() ?? '';
   const permissions = normalizeFeaturePermissions(body.permissions ?? defaultMemberPermissions);
   const permissionExpiries = normalizeFeatureExpiries(body.permissionExpiries);
 
@@ -38,10 +36,6 @@ export async function POST(request: Request) {
 
   if (!phone) {
     return NextResponse.json({ ok: false, message: 'Phone is required.' }, { status: 400 });
-  }
-
-  if (!expireDate) {
-    return NextResponse.json({ ok: false, message: 'Expire date is required.' }, { status: 400 });
   }
 
   const supabase = createSupabaseAdminClient();
@@ -70,7 +64,7 @@ export async function POST(request: Request) {
     phone,
     email,
     role: 'member',
-    expire_date: expireDate,
+    expire_date: null,
     status: 'active',
     feature_permissions: permissions,
     feature_expiries: permissionExpiries

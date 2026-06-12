@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-import { isDateActive } from '@/lib/feature-permissions';
 import { createSupabaseMiddlewareClient } from '@/lib/supabase/middleware';
 
 const publicPaths = ['/login', '/admin-login'];
@@ -11,20 +10,19 @@ async function getRole(request: NextRequest, response: NextResponse) {
   const { data } = await supabase.auth.getUser();
 
   if (!data.user) {
-    return { role: null, userId: null, status: null, expireDate: null };
+    return { role: null, userId: null, status: null };
   }
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role,status,expire_date')
+    .select('role,status')
     .eq('id', data.user.id)
     .single();
 
   return {
     role: profile?.role ?? null,
     userId: data.user.id,
-    status: profile?.status ?? null,
-    expireDate: profile?.expire_date ?? null
+    status: profile?.status ?? null
   };
 }
 
@@ -88,13 +86,6 @@ export async function middleware(request: NextRequest) {
       const url = request.nextUrl.clone();
       url.pathname = '/login';
       url.searchParams.set('reason', 'inactive');
-      return NextResponse.redirect(url);
-    }
-
-    if (!isDateActive(session.expireDate)) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/login';
-      url.searchParams.set('reason', 'expired');
       return NextResponse.redirect(url);
     }
 

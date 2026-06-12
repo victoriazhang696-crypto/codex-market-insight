@@ -2,6 +2,8 @@
 
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react';
 
+import { normalizeFeatureExpiries, type FeatureExpiries } from '@/lib/feature-permissions';
+
 type DrivingSchoolMember = {
   id: string;
   account_number: string;
@@ -9,6 +11,7 @@ type DrivingSchoolMember = {
   phone: string | null;
   expire_date: string | null;
   status: string;
+  feature_expiries?: FeatureExpiries | null;
 };
 
 type DrivingSchoolContent = {
@@ -216,7 +219,7 @@ export default function AdminDrivingSchoolPage() {
               <option value="">选择已开通环球驾校权限的客户</option>
               {members.map((member) => (
                 <option key={member.id} value={member.id}>
-                  {member.full_name ?? '会员'} · {member.account_number} · 到期 {member.expire_date ?? '未设置'}
+                  {member.full_name ?? '会员'} · {member.account_number} · 环球驾校至 {normalizeFeatureExpiries(member.feature_expiries).driving_school ?? '长期有效'}
                 </option>
               ))}
             </select>

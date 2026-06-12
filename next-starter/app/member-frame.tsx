@@ -68,7 +68,7 @@ export default async function MemberFrame({ activePath, eyebrow, title, descript
           items={sidebarItems.map((item) => {
             const enabled = item.href === '/logout' || Boolean(
               profile?.status === 'active' &&
-              hasActiveFeaturePermission(profile.featurePermissions, profile.featureExpiries, item.permission, profile.expireDate)
+              hasActiveFeaturePermission(profile.featurePermissions, profile.featureExpiries, item.permission)
             );
             const badge = articleBadges[item.href];
             const badgeCount = badge?.count ?? 0;

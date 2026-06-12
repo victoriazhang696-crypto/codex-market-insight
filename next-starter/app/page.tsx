@@ -123,9 +123,9 @@ export default async function MemberHomePage() {
   ]);
 
   const canUse = (permission: FeaturePermission) =>
-    hasActiveFeaturePermission(profile?.featurePermissions, profile?.featureExpiries, permission, profile?.expireDate);
+    hasActiveFeaturePermission(profile?.featurePermissions, profile?.featureExpiries, permission);
   const getFeatureExpiry = (permission: FeaturePermission) =>
-    getFeatureExpireDate(profile?.featureExpiries, permission, profile?.expireDate);
+    getFeatureExpireDate(profile?.featureExpiries, permission);
 
   const todaysMarketArticles = publishedArticles.filter(
     (article) => article.category === 'market_today' && isPublishedTodayInMalaysia(article) && titleMatchesToday(article.title)
@@ -135,16 +135,6 @@ export default async function MemberHomePage() {
     .slice(0, 3);
   const usReviewArticles = publishedArticles.filter((article) => article.category === 'us_review');
   const latestToday = todaysMarketArticles[0];
-
-  const expireText = profile?.expireDate ?? '未设置';
-  const remainingText =
-    profile?.remainingDays === null || profile?.remainingDays === undefined
-      ? '未设置'
-      : profile.remainingDays > 0
-        ? `${profile.remainingDays} 天`
-        : profile.remainingDays === 0
-          ? '今日到期'
-          : '已到期';
 
   const navItems: MemberNavItem[] = sidebarItems.map((item) => {
     const enabled = item.href === '/logout' || canUse(item.permission);
@@ -229,14 +219,6 @@ export default async function MemberHomePage() {
               <div>
                 <dt>会员账号</dt>
                 <dd>{profile?.accountNumber ?? '已登录'}</dd>
-              </div>
-              <div>
-                <dt>到期时间</dt>
-                <dd>{expireText}</dd>
-              </div>
-              <div>
-                <dt>账号剩余</dt>
-                <dd>{remainingText}</dd>
               </div>
               <div>
                 <dt>会员状态</dt>

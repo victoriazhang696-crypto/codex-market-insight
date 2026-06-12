@@ -66,7 +66,6 @@ export default function AdminMembersPage() {
       accountNumber: String(formData.get('accountNumber') ?? ''),
       fullName: String(formData.get('fullName') ?? ''),
       phone: String(formData.get('phone') ?? ''),
-      expireDate: String(formData.get('expireDate') ?? ''),
       permissions: formData.getAll('permissions').map(String) as FeaturePermission[],
       permissionExpiries: collectPermissionExpiries(formData)
     };
@@ -101,7 +100,7 @@ export default function AdminMembersPage() {
         <p className="eyebrow">Staff Only</p>
         <h1>客户管理</h1>
         <p className="lede">
-          新增客户时输入 8 位账号、姓名、手机号和到期时间。初始密码就是手机号。
+          新增客户时输入 8 位账号、姓名和手机号。初始密码就是手机号，阅读期限按栏目单独设置。
         </p>
       </section>
 
@@ -120,10 +119,6 @@ export default function AdminMembersPage() {
             <span className="label">手机号</span>
             <input name="phone" placeholder="60123456789" required />
           </label>
-          <label>
-            <span className="label">到期时间</span>
-            <input name="expireDate" placeholder="2026-12-31" type="date" required />
-          </label>
           <fieldset className="form-fieldset">
             <legend>开通权限</legend>
             <div className="permission-grid">
@@ -139,7 +134,7 @@ export default function AdminMembersPage() {
                     <span>{item.label}</span>
                   </label>
                   <input name={`expiry_${item.value}`} type="date" aria-label={`${item.label} 单独到期日`} />
-                  <span className="subtle">留空使用总到期时间</span>
+                  <span className="subtle">留空表示长期有效</span>
                 </div>
               ))}
             </div>
@@ -165,7 +160,6 @@ export default function AdminMembersPage() {
                 <th>账号</th>
                 <th>姓名</th>
                 <th>手机号</th>
-                <th>到期</th>
                 <th>状态</th>
                 <th>权限</th>
                 <th>操作</th>
@@ -177,7 +171,6 @@ export default function AdminMembersPage() {
                   <td>{member.account_number}</td>
                   <td>{member.full_name}</td>
                   <td>{member.phone}</td>
-                  <td>{member.expire_date}</td>
                   <td>{member.status}</td>
                   <td>
                     {normalizeFeaturePermissions(member.feature_permissions).map((permission) => (
@@ -193,7 +186,7 @@ export default function AdminMembersPage() {
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={7}>暂无客户</td>
+                  <td colSpan={6}>暂无客户</td>
                 </tr>
               )}
             </tbody>

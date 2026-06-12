@@ -10,7 +10,6 @@ type Params = {
 type MemberUpdateBody = {
   fullName?: string;
   phone?: string;
-  expireDate?: string;
   status?: 'active' | 'expired' | 'disabled';
   permissions?: FeaturePermission[];
   permissionExpiries?: FeatureExpiries;
@@ -25,7 +24,6 @@ export async function PATCH(request: Request, { params }: Params) {
 
   if (body.fullName !== undefined) updates.full_name = body.fullName.trim();
   if (body.phone !== undefined) updates.phone = body.phone.trim();
-  if (body.expireDate !== undefined) updates.expire_date = body.expireDate.trim();
   if (body.status !== undefined) updates.status = body.status;
   if (body.permissions !== undefined) updates.feature_permissions = normalizeFeaturePermissions(body.permissions);
   if (body.permissionExpiries !== undefined) updates.feature_expiries = normalizeFeatureExpiries(body.permissionExpiries);

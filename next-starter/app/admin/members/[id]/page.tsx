@@ -72,7 +72,6 @@ export default function AdminMemberEditorPage() {
     const payload = {
       fullName: String(formData.get('fullName') ?? ''),
       phone: String(formData.get('phone') ?? ''),
-      expireDate: String(formData.get('expireDate') ?? ''),
       status: String(formData.get('status') ?? 'active') as 'active' | 'expired' | 'disabled',
       permissions: formData.getAll('permissions').map(String) as FeaturePermission[],
       permissionExpiries: collectPermissionExpiries(formData)
@@ -117,7 +116,7 @@ export default function AdminMemberEditorPage() {
       <section className="hero-card dark">
         <p className="eyebrow">客户编辑</p>
         <h1>{member.full_name}</h1>
-        <p className="lede">在这里修改客户名称、手机号、到期时间和状态。</p>
+        <p className="lede">在这里修改客户名称、手机号、状态，以及每个栏目的独立权限期限。</p>
         <div className="inline-actions">
           <span className="secondary-link">账号 {member.account_number}</span>
           <span className="secondary-link">初始密码 = 手机号</span>
@@ -135,10 +134,6 @@ export default function AdminMemberEditorPage() {
           <label>
             <span>手机号</span>
             <input name="phone" defaultValue={member.phone ?? ''} />
-          </label>
-          <label>
-            <span>到期时间</span>
-            <input name="expireDate" defaultValue={member.expire_date ?? ''} />
           </label>
           <label>
             <span>状态</span>
@@ -168,7 +163,7 @@ export default function AdminMemberEditorPage() {
                     aria-label={`${item.label} 单独到期日`}
                     defaultValue={normalizeFeatureExpiries(member.feature_expiries)[item.value] ?? ''}
                   />
-                  <span className="subtle">留空使用总到期时间</span>
+                  <span className="subtle">留空表示长期有效</span>
                 </div>
               ))}
             </div>
