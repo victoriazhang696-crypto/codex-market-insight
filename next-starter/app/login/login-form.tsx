@@ -9,6 +9,7 @@ type LoginFormProps = {
   searchParams: {
     next?: string;
     reason?: string;
+    loggedOut?: string;
   };
 };
 
@@ -60,6 +61,17 @@ export default function LoginForm({ searchParams }: LoginFormProps) {
   }
 
   useEffect(() => {
+    const wasExplicitLogout =
+      searchParams.loggedOut === '1' || window.sessionStorage.getItem('member-logout-intent') === '1';
+
+    if (wasExplicitLogout) {
+      window.sessionStorage.removeItem('member-logout-intent');
+      window.localStorage.removeItem('member-login');
+      setRemember(false);
+      setMessage('已退出登录，可以输入新的账号。');
+      return;
+    }
+
     const saved = window.localStorage.getItem('member-login');
     if (!saved || searchParams.reason) {
       return;

@@ -527,6 +527,8 @@ h1 {
 .member-nav a.active {
   background: linear-gradient(135deg, #2667ff, #2514b8);
   box-shadow: 0 16px 34px rgba(37, 86, 255, 0.35);
+  color: #ffffff;
+  opacity: 1;
 }
 
 .member-nav a:not(.active):hover {
@@ -536,6 +538,11 @@ h1 {
 
 .member-nav a.locked {
   color: #697996;
+}
+
+.member-nav a.active.locked,
+.member-nav a.active .nav-icon {
+  color: #ffffff;
 }
 
 .nav-icon {

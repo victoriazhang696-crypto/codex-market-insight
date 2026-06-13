@@ -4,6 +4,7 @@ type LoginPageProps = {
   searchParams?: Promise<{
     next?: string;
     reason?: string;
+    loggedOut?: string;
   }>;
 };
 

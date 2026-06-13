@@ -137,7 +137,7 @@ export default async function MemberHomePage() {
   const latestToday = todaysMarketArticles[0];
 
   const navItems: MemberNavItem[] = sidebarItems.map((item) => {
-    const enabled = item.href === '/logout' || canUse(item.permission);
+    const enabled = item.href === '/' || item.href === '/logout' || canUse(item.permission);
     const badgeCount =
       item.href === '/today'
         ? todaysMarketArticles.length

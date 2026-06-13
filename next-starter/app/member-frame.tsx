@@ -66,7 +66,7 @@ export default async function MemberFrame({ activePath, eyebrow, title, descript
         <MemberNav
           ariaLabel="会员功能导航"
           items={sidebarItems.map((item) => {
-            const enabled = item.href === '/logout' || Boolean(
+            const enabled = item.href === '/' || item.href === '/logout' || Boolean(
               profile?.status === 'active' &&
               hasActiveFeaturePermission(profile.featurePermissions, profile.featureExpiries, item.permission)
             );

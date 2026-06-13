@@ -10,9 +10,11 @@ export default function LogoutPage() {
   useEffect(() => {
     async function run() {
       try {
+        window.localStorage.removeItem('member-login');
+        window.sessionStorage.setItem('member-logout-intent', '1');
         await fetch('/api/auth/logout', { method: 'POST' });
         setMessage('退出成功，正在返回登录页...');
-        router.replace('/login');
+        router.replace('/login?loggedOut=1');
       } catch {
         setMessage('退出失败');
       }
