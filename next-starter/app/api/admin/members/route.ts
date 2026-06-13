@@ -14,15 +14,26 @@ type MemberCreateBody = {
   accountNumber?: string;
   fullName?: string;
   phone?: string;
+  computeCredits?: number | string;
   permissions?: FeaturePermission[];
   permissionExpiries?: FeatureExpiries;
 };
+
+function normalizeComputeCredits(value: unknown) {
+  if (value === '' || value === null || value === undefined) {
+    return 0;
+  }
+
+  const amount = Number(value);
+  return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+}
 
 export async function POST(request: Request) {
   const body = (await request.json()) as MemberCreateBody;
   const accountNumber = body.accountNumber?.trim() ?? '';
   const fullName = body.fullName?.trim() ?? '';
   const phone = normalizePhonePassword(body.phone ?? '');
+  const computeCredits = normalizeComputeCredits(body.computeCredits);
   const permissions = normalizeFeaturePermissions(body.permissions ?? defaultMemberPermissions);
   const permissionExpiries = normalizeFeatureExpiries(body.permissionExpiries);
 
@@ -66,14 +77,22 @@ export async function POST(request: Request) {
     role: 'member',
     expire_date: null,
     status: 'active',
+    compute_credits: computeCredits,
     feature_permissions: permissions,
     feature_expiries: permissionExpiries
   };
 
   const { error: profileError } = await supabase.from('profiles').insert(profilePayload);
 
-  if (profileError && (profileError.message.toLowerCase().includes('feature_permissions') || profileError.message.toLowerCase().includes('feature_expiries'))) {
-    const { feature_permissions: _featurePermissions, feature_expiries: _featureExpiries, ...legacyPayload } = profilePayload;
+  if (
+    profileError &&
+    (
+      profileError.message.toLowerCase().includes('feature_permissions') ||
+      profileError.message.toLowerCase().includes('feature_expiries') ||
+      profileError.message.toLowerCase().includes('compute_credits')
+    )
+  ) {
+    const { feature_permissions: _featurePermissions, feature_expiries: _featureExpiries, compute_credits: _computeCredits, ...legacyPayload } = profilePayload;
     const legacyResult = await supabase.from('profiles').insert(legacyPayload);
 
     if (legacyResult.error) {
@@ -110,7 +129,7 @@ export async function GET() {
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, account_number, full_name, phone, expire_date, status, feature_permissions, feature_expiries')
+    .select('id, account_number, full_name, phone, expire_date, status, feature_permissions, feature_expiries, compute_credits')
     .eq('role', 'member')
     .order('created_at', { ascending: false });
 

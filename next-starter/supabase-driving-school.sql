@@ -3,7 +3,8 @@
 
 alter table if exists public.profiles
   add column if not exists feature_permissions jsonb default '["market_today","market_history","member_notice"]'::jsonb,
-  add column if not exists feature_expiries jsonb default '{}'::jsonb;
+  add column if not exists feature_expiries jsonb default '{}'::jsonb,
+  add column if not exists compute_credits integer not null default 0;
 
 alter table if exists public.articles
   add column if not exists content_category text not null default 'market_today';
@@ -19,10 +20,14 @@ create table if not exists public.personal_contents (
   body text not null,
   content_type text not null default '定制内容',
   attachment_url text,
+  compute_cost integer not null default 0,
   status text not null default 'published' check (status in ('draft', 'published', 'hidden')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table if exists public.personal_contents
+  add column if not exists compute_cost integer not null default 0;
 
 create index if not exists personal_contents_target_idx
   on public.personal_contents(target_user_id, service_key, status, created_at desc);

@@ -10,6 +10,7 @@ export type PersonalContent = {
   body: string;
   contentType: string;
   attachmentUrl: string | null;
+  computeCost: number;
   status: 'draft' | 'published' | 'hidden';
   createdAt?: string;
   updatedAt?: string;
@@ -24,13 +25,14 @@ function mapPersonalContent(row: Record<string, unknown>): PersonalContent {
     body: String(row.body ?? ''),
     contentType: String(row.content_type ?? '定制内容'),
     attachmentUrl: row.attachment_url ? String(row.attachment_url) : null,
+    computeCost: Number(row.compute_cost ?? 0),
     status: row.status === 'draft' || row.status === 'hidden' ? row.status : 'published',
     createdAt: row.created_at ? String(row.created_at) : undefined,
     updatedAt: row.updated_at ? String(row.updated_at) : undefined
   };
 }
 
-const personalContentSelect = 'id, service_key, target_user_id, title, body, content_type, attachment_url, status, created_at, updated_at';
+const personalContentSelect = 'id, service_key, target_user_id, title, body, content_type, attachment_url, compute_cost, status, created_at, updated_at';
 
 export async function getCurrentMemberPersonalContents(serviceKey: FeaturePermission) {
   const [profile, canAccess] = await Promise.all([

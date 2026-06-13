@@ -11,6 +11,7 @@ type DrivingSchoolMember = {
   phone: string | null;
   expire_date: string | null;
   status: string;
+  compute_credits?: number | null;
   feature_expiries?: FeatureExpiries | null;
 };
 
@@ -21,6 +22,7 @@ type DrivingSchoolContent = {
   body: string;
   content_type: string;
   attachment_url: string | null;
+  compute_cost?: number | null;
   status: string;
   created_at: string;
   profiles?: {
@@ -46,6 +48,11 @@ const emptyForm: ContentForm = {
   attachmentUrl: '',
   status: 'published'
 };
+
+function formatComputeCredits(value: unknown) {
+  const amount = Number(value ?? 0);
+  return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+}
 
 export default function AdminDrivingSchoolPage() {
   const [members, setMembers] = useState<DrivingSchoolMember[]>([]);
@@ -97,9 +104,22 @@ export default function AdminDrivingSchoolPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      const result = (await response.json()) as { ok: boolean; message?: string };
+      const result = (await response.json()) as {
+        ok: boolean;
+        message?: string;
+        computeCost?: number;
+        remainingCredits?: number | null;
+      };
       if (result.ok) {
-        setMessage(editingId ? '专属内容已更新。' : '专属内容已保存。');
+        const cost = formatComputeCredits(result.computeCost);
+        const remaining = result.remainingCredits === null || result.remainingCredits === undefined
+          ? null
+          : formatComputeCredits(result.remainingCredits);
+        if (cost > 0) {
+          setMessage(`专属内容已保存，已扣 ${cost} 算力${remaining === null ? '' : `，剩余 ${remaining} 算力`}。`);
+        } else {
+          setMessage(editingId ? '专属内容已更新，未重复扣算力。' : '专属内容已保存；发布给客户可见时会扣 88 算力。');
+        }
         setFormValue(emptyForm);
         setEditingId(null);
         await loadData();
@@ -188,8 +208,16 @@ export default function AdminDrivingSchoolPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status })
       });
-      const result = (await response.json()) as { ok: boolean; message?: string };
-      setMessage(result.ok ? '状态已更新。' : result.message ?? '更新失败');
+      const result = (await response.json()) as { ok: boolean; message?: string; computeCost?: number; remainingCredits?: number | null };
+      if (result.ok) {
+        const cost = formatComputeCredits(result.computeCost);
+        const remaining = result.remainingCredits === null || result.remainingCredits === undefined
+          ? null
+          : formatComputeCredits(result.remainingCredits);
+        setMessage(cost > 0 ? `状态已更新，已扣 ${cost} 算力${remaining === null ? '' : `，剩余 ${remaining} 算力`}。` : '状态已更新。');
+      } else {
+        setMessage(result.message ?? '更新失败');
+      }
       if (result.ok) await loadData();
     } catch {
       setMessage('网络请求失败');
@@ -219,10 +247,15 @@ export default function AdminDrivingSchoolPage() {
               <option value="">选择已开通环球驾校权限的客户</option>
               {members.map((member) => (
                 <option key={member.id} value={member.id}>
-                  {member.full_name ?? '会员'} · {member.account_number} · 环球驾校至 {normalizeFeatureExpiries(member.feature_expiries).driving_school ?? '长期有效'}
+                  {member.full_name ?? '会员'} · {member.account_number} · 算力 {formatComputeCredits(member.compute_credits)} · 环球驾校至 {normalizeFeatureExpiries(member.feature_expiries).driving_school ?? '长期有效'}
                 </option>
               ))}
             </select>
+            {formValue.targetUserId ? (
+              <span className="subtle">
+                当前客户算力：{formatComputeCredits(members.find((member) => member.id === formValue.targetUserId)?.compute_credits)}。新发布一篇可见内容扣 88，编辑已发布内容不重复扣。
+              </span>
+            ) : null}
           </label>
           <label>
             <span>内容类型</span>
@@ -278,7 +311,7 @@ export default function AdminDrivingSchoolPage() {
             <article key={item.id} className="member-list-row">
               <strong>{item.title}</strong>
               <span>
-                {item.profiles?.full_name ?? '会员'} · {item.profiles?.account_number ?? item.target_user_id} · {item.content_type} · {item.status}
+                {item.profiles?.full_name ?? '会员'} · {item.profiles?.account_number ?? item.target_user_id} · {item.content_type} · {item.status} · 消耗 {formatComputeCredits(item.compute_cost)} 算力
               </span>
               <span className="inline-actions">
                 <button className="secondary-button" type="button" onClick={() => editContent(item)}>编辑</button>

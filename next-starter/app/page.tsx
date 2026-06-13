@@ -224,6 +224,10 @@ export default async function MemberHomePage() {
                 <dt>会员状态</dt>
                 <dd className={profile?.status === 'active' ? 'status-active' : ''}>{profile?.status ?? 'active'}</dd>
               </div>
+              <div>
+                <dt>环球驾校算力</dt>
+                <dd>{profile?.computeCredits ?? 0}</dd>
+              </div>
             </dl>
             <div className="vip-feature-expiry-list">
               <span>栏目剩余</span>

@@ -18,6 +18,7 @@ type Member = {
   phone: string | null;
   expire_date: string | null;
   status: string;
+  compute_credits?: number | null;
   feature_permissions?: FeaturePermission[] | null;
   feature_expiries?: FeatureExpiries | null;
 };
@@ -66,6 +67,7 @@ export default function AdminMembersPage() {
       accountNumber: String(formData.get('accountNumber') ?? ''),
       fullName: String(formData.get('fullName') ?? ''),
       phone: String(formData.get('phone') ?? ''),
+      computeCredits: String(formData.get('computeCredits') ?? '0'),
       permissions: formData.getAll('permissions').map(String) as FeaturePermission[],
       permissionExpiries: collectPermissionExpiries(formData)
     };
@@ -122,6 +124,10 @@ export default function AdminMembersPage() {
             <span className="label">手机号</span>
             <input name="phone" placeholder="60123456789" required />
           </label>
+          <label>
+            <span className="label">环球驾校算力值</span>
+            <input name="computeCredits" type="number" min="0" step="1" placeholder="8800" defaultValue="0" />
+          </label>
           <fieldset className="form-fieldset">
             <legend>开通权限</legend>
             <div className="permission-grid">
@@ -164,6 +170,7 @@ export default function AdminMembersPage() {
                 <th>姓名</th>
                 <th>手机号</th>
                 <th>状态</th>
+                <th>算力</th>
                 <th>权限</th>
                 <th>操作</th>
               </tr>
@@ -175,6 +182,7 @@ export default function AdminMembersPage() {
                   <td>{member.full_name}</td>
                   <td>{member.phone}</td>
                   <td>{member.status}</td>
+                  <td>{member.compute_credits ?? 0}</td>
                   <td>
                     {normalizeFeaturePermissions(member.feature_permissions).map((permission) => (
                       <span key={permission} className="mini-badge">
@@ -189,7 +197,7 @@ export default function AdminMembersPage() {
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan={6}>暂无客户</td>
+                  <td colSpan={7}>暂无客户</td>
                 </tr>
               )}
             </tbody>

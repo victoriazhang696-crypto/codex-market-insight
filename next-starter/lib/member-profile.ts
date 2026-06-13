@@ -17,7 +17,13 @@ export type MemberProfile = {
   featurePermissions: FeaturePermission[];
   featureExpiries: FeatureExpiries;
   remainingDays: number | null;
+  computeCredits: number;
 };
+
+function normalizeComputeCredits(value: unknown) {
+  const amount = Number(value ?? 0);
+  return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+}
 
 export async function getCurrentMemberProfile(): Promise<MemberProfile | null> {
   const supabase = await createSupabaseServerClient();
@@ -29,7 +35,7 @@ export async function getCurrentMemberProfile(): Promise<MemberProfile | null> {
 
   const { data } = await supabase
     .from('profiles')
-    .select('account_number, full_name, expire_date, status, role, feature_permissions, feature_expiries')
+    .select('account_number, full_name, expire_date, status, role, feature_permissions, feature_expiries, compute_credits')
     .eq('id', authData.user.id)
     .single();
 
@@ -52,7 +58,8 @@ export async function getCurrentMemberProfile(): Promise<MemberProfile | null> {
       status: fallbackResult.data.status ?? 'active',
       featurePermissions: normalizeFeaturePermissions(null),
       featureExpiries: {},
-      remainingDays: getRemainingDaysFromMalaysiaToday(fallbackResult.data.expire_date ?? null)
+      remainingDays: getRemainingDaysFromMalaysiaToday(fallbackResult.data.expire_date ?? null),
+      computeCredits: 0
     };
   }
 
@@ -68,7 +75,8 @@ export async function getCurrentMemberProfile(): Promise<MemberProfile | null> {
     status: data.status ?? 'active',
     featurePermissions: normalizeFeaturePermissions(data.feature_permissions),
     featureExpiries: normalizeFeatureExpiries(data.feature_expiries),
-    remainingDays: getRemainingDaysFromMalaysiaToday(data.expire_date ?? null)
+    remainingDays: getRemainingDaysFromMalaysiaToday(data.expire_date ?? null),
+    computeCredits: normalizeComputeCredits(data.compute_credits)
   };
 }
 

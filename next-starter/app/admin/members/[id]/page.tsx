@@ -18,6 +18,7 @@ type MemberRecord = {
   phone: string | null;
   expire_date: string | null;
   status: string;
+  compute_credits?: number | null;
   feature_permissions?: FeaturePermission[] | null;
   feature_expiries?: FeatureExpiries | null;
 };
@@ -53,6 +54,7 @@ export default function AdminMemberEditorPage() {
           phone: '60123456789',
           expire_date: '2026-12-31',
           status: 'active',
+          compute_credits: 0,
           feature_permissions: ['market_today', 'market_history'],
           feature_expiries: {}
         });
@@ -73,6 +75,7 @@ export default function AdminMemberEditorPage() {
       fullName: String(formData.get('fullName') ?? ''),
       phone: String(formData.get('phone') ?? ''),
       status: String(formData.get('status') ?? 'active') as 'active' | 'expired' | 'disabled',
+      computeCredits: String(formData.get('computeCredits') ?? '0'),
       permissions: formData.getAll('permissions').map(String) as FeaturePermission[],
       permissionExpiries: collectPermissionExpiries(formData)
     };
@@ -92,7 +95,7 @@ export default function AdminMemberEditorPage() {
         setMember(result.member);
       }
 
-      setMessage(result.ok ? '客户资料已保存，权限和单独期限已同步。' : result.message ?? '保存失败');
+      setMessage(result.ok ? '客户资料已保存，权限、单独期限和算力值已同步。' : result.message ?? '保存失败');
     } catch {
       setMessage('网络请求失败');
     } finally {
@@ -142,6 +145,11 @@ export default function AdminMemberEditorPage() {
               <option value="expired">expired</option>
               <option value="disabled">disabled</option>
             </select>
+          </label>
+          <label>
+            <span>环球驾校算力值</span>
+            <input name="computeCredits" type="number" min="0" step="1" defaultValue={member.compute_credits ?? 0} />
+            <span className="subtle">发布一篇新的环球驾校定向内容会扣 88；编辑已发布内容不重复扣。</span>
           </label>
           <fieldset className="form-fieldset">
             <legend>栏目权限</legend>
