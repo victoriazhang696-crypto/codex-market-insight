@@ -31,7 +31,7 @@ export default async function AdminArticleEditorPage({
       <section className="hero-card dark">
         <p className="eyebrow">文章编辑</p>
         <h1>{article.title}</h1>
-        <p className="lede">这里是单篇文章编辑页，后续会接 Supabase 的文章读取和保存。</p>
+        <p className="lede">这里可以修改已发布或草稿文章。保存后，会员前端会读取最新内容。</p>
         <div className="inline-actions">
           <a className="secondary-link" href="/admin/articles">返回文章列表</a>
           <a className="secondary-link" href={`/today/${article.slug}`}>查看前台效果</a>

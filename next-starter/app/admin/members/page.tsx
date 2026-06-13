@@ -102,6 +102,9 @@ export default function AdminMembersPage() {
         <p className="lede">
           新增客户时输入 8 位账号、姓名和手机号。初始密码就是手机号，阅读期限按栏目单独设置。
         </p>
+        <div className="inline-actions">
+          <a className="secondary-link" href="/admin">返回后台首页</a>
+        </div>
       </section>
 
       <section className="hero-card" style={{ marginTop: 16 }}>
