@@ -221,7 +221,7 @@ export default function AdminArticlesPage() {
                 </span>
               </div>
               <div className="inline-actions compact-actions">
-                <a href={`/admin/articles/${item.slug}`}>编辑</a>
+                <a href={`/admin/articles/${item.id}`}>编辑</a>
                 <a href={`/today/${item.slug}`}>预览</a>
                 {item.status === 'published' ? (
                   <button className="secondary-button" type="button" onClick={() => void updateArticleStatus(item.id, 'draft')}>隐藏</button>

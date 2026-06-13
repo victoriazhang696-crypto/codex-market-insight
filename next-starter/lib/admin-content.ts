@@ -18,19 +18,26 @@ function mapArticle(row: Record<string, unknown>): ContentArticle {
 
 export async function getAdminArticleBySlug(slug: string) {
   const supabase = createSupabaseAdminClient();
+
   const { data, error } = await supabase
     .from('articles')
     .select('id, slug, title, summary, content, risk_notice, status, content_category, published_at')
     .eq('slug', slug)
     .single();
 
-  if (error) {
+  if (data) {
+    return mapArticle(data);
+  }
+
+  const { data: articleById, error: idError } = await supabase
+    .from('articles')
+    .select('id, slug, title, summary, content, risk_notice, status, content_category, published_at')
+    .eq('id', slug)
+    .single();
+
+  if (error && idError) {
     return null;
   }
 
-  if (!data) {
-    return null;
-  }
-
-  return mapArticle(data);
+  return articleById ? mapArticle(articleById) : null;
 }
